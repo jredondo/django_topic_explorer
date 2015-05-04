@@ -19,19 +19,19 @@ By now this is no more than a kind of rudimentary proof of concept we hope to en
 ...# python manage.py runserver
 
 1) To request a visulization of documents ordered in terms of similarity to a determined topic, then use:
-http://127.0.0.1:8000/topic_explorer/topic/70/10/
+http://127.0.0.1:8000/topic_explorer/topic/70/10/ <br />
 
-http://127.0.0.1:8000/topic_explorer --> App Url
-/topic --> Order by topic
-/70    --> Model with 70 topics
-/10    --> Topic (from the topic legend) in terms of which documents will be ordered
+http://127.0.0.1:8000/topic_explorer --> App Url <br />
+/topic --> Order by topic <br />
+/70    --> Model with 70 topics <br />
+/10    --> Topic (from the topic legend) in terms of which documents will be ordered <br />
 
 
 2) To request a visulization of documents ordered in terms of similarity to a determined document, then use:
-http://127.0.0.1:8000/topic_explorer/doc/70/AP881107-0210/
+http://127.0.0.1:8000/topic_explorer/doc/70/AP881107-0210/ <br />
 
-http://127.0.0.1:8000/topic_explorer/ --> App url
-/doc   --> Order by document
-/70    --> Number of topics
-/AP881107-0210  --> Document in terms of which the remaining documents will be ordered 
+http://127.0.0.1:8000/topic_explorer/ --> App url <br />
+/doc   --> Order by document <br />
+/70    --> Number of topics <br />
+/AP881107-0210  --> Document in terms of which the remaining documents will be ordered  <br />
 
