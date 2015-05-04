@@ -1,5 +1,5 @@
 # django_topic_explorer
-This is an alternative (Django based) implementation of this software: https://github.com/inpho/topic-explorer
+This is an alternative (Django based) implementation of this software: https://github.com/inpho/topic-explorer.
 By now this is no more than a kind of rudimentary proof of concept we hope to enrich in the forthcoming.
 
 ## By now, we use:
@@ -28,7 +28,7 @@ Y: Number of topics
 Z: Topic in terms of which documents will be ordered
 
 2) To request a visulization of documents ordered in terms of similarity to a determined document, then use:
-http://127.0.0.1:8000/topic_explorer/doc/70/AP881107-0210/  
+http://127.0.0.1:8000/topic_explorer/doc/70/AP881107-0210/
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^|^^|^^^^^^^^^^^^^^
                   W                 | X |Y |     Z 
 W: App url
