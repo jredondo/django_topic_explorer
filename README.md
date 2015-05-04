@@ -20,19 +20,18 @@ By now this is no more than a kind of rudimentary proof of concept we hope to en
 
 1) To request a visulization of documents ordered in terms of similarity to a determined topic, then use:
 http://127.0.0.1:8000/topic_explorer/topic/70/10/
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^^^|^^|^^
-                  W                 |  X  |Y | Z 
-W: App url
-X: order by topic
-Y: Number of topics
-Z: Topic in terms of which documents will be ordered
+
+http://127.0.0.1:8000/topic_explorer --> App Url
+/topic --> Order by topic
+/70    --> Model with 70 topics
+/10    --> Topic (from the topic legend) in terms of which documents will be ordered
+
 
 2) To request a visulization of documents ordered in terms of similarity to a determined document, then use:
 http://127.0.0.1:8000/topic_explorer/doc/70/AP881107-0210/
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^|^^^|^^|^^^^^^^^^^^^^^
-                  W                 | X |Y |     Z 
-W: App url
-X: order by document
-Y: Number of topics
-Z: Document in terms of which the remaining documents will be ordered 
+
+http://127.0.0.1:8000/topic_explorer/ --> App url
+/doc   --> Order by document
+/70    --> Number of topics
+/AP881107-0210  --> Document in terms of which the remaining documents will be ordered 
 
