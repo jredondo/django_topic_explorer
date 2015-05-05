@@ -9,7 +9,7 @@ By now this is no more than a kind of rudimentary proof of concept we hope to en
 - Urls for requests (Buttons in the interface does not work, see "Using it")
 
 ## In the forthcoming, we hope to:
-- Provide user interface to select a corpus in the fly (not sure how) from a determined set.
+- Provide user interface to select a corpus on the fly (not sure how) from a determined set.
 - Not use global variables.
 - Develop some per-document visualization.
 - ...
