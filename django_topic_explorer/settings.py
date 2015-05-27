@@ -94,11 +94,13 @@ TEMPLATE_DIRS = (
 
 ## TOPIC EXPLORER SETTINGS
 TOPIC_EXPLORER_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/'
-
 PATH = TOPIC_EXPLORER_PATH + 'demo-data/ap/../models/'
 CORPUS_FILE = TOPIC_EXPLORER_PATH + 'demo-data/ap/../models/ap-nltk-en-freq5.npz'
-CONTEXT_TYPE = 'document'
 MODEL_PATTERN = TOPIC_EXPLORER_PATH + 'demo-data/ap/../models/ap-nltk-en-freq5-LDA-K{0}-document-20.npz'
+#PATH = TOPIC_EXPLORER_PATH + 'demo-data/programapatrio_propuestas_descripcion/../models/'
+#CORPUS_FILE = TOPIC_EXPLORER_PATH + 'demo-data/programapatrio_propuestas_descripcion/../models/programapatrio_propuestas_descripcion-nltk-en-freq5.npz'
+#MODEL_PATTERN = TOPIC_EXPLORER_PATH + 'demo-data/programapatrio_propuestas_descripcion/../models/programapatrio_propuestas_descripcion-nltk-en-freq5-LDA-K{0}-document-20.npz'
+CONTEXT_TYPE = 'document'
 #PORT = '16{0:03d}'
 #HOST = '0.0.0.0'
 TOPICS = '10, 20, 30, 40, 50, 60, 70, 80, 90, 100'
