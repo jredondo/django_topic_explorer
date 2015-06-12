@@ -14,150 +14,8 @@
 <script src="{% static "topic_explorer/js/htrc.js" %}"></script>
 <script src="{% static "topic_explorer/js/icons.js" %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static "topic_explorer/bootstrap-2.3.2/css/bootstrap.min.css" %}"/>
-<!--<link rel="stylesheet" type="text/css" href="style.css" />-->
-<style>
-.y.axis text {
-  visibility: hidden;
-}
-.y.axis g .icon {
-  opacity: 0;
-  }
-.y.axis g:hover .icon {
-  opacity: 1.0;
-  }
+<link rel="stylesheet" type="text/css" href="{% static "topic_explorer/css/topic_explorer.css" %}"/>
 
-.y.axis text, .y.axis image {
-  cursor: pointer;
-  }
-.y.axis rect:hover {
-  stroke: #fff;  
-  stroke-width: 0;
-  opacity: 0 !important;
-}
-.y.axis rect:hover .icon {
-  opacity: 1 !important;
-}
-
-.docLabel {
-  }
-
-.bar {
-    fill: steelblue;
-}
-
-.bar:hover {
-    fill: brown;
-}
-
-.axis {
-    font: 11px sans-serif;
-}
-
-.axis path,
-.axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-.docLabel{
-  font:11px sans-serif;  
-  pointer-events: none;
-}
-
-rect {
-  opacity: 0.6;
-  }
-
-rect.hover {
-  stroke: #000;
-  stroke-width: 1;
-  shape-rendering: crispEdges;
-  cursor: crosshair;
-}
-
-rect.hover, .legend rect {
-  opacity: 0.8;
-}
-.doc:hover rect, .doc.hover rect {
-  opacity: 1.0;
-  }
-rect:hover {
-  opacity: 1.0 !important;
-}
-rect:hover, .legend.hover rect, .legend.selected rect {
-  stroke: #000;
-  stroke-width: 2;
-  shape-rendering: crispEdges;
-  }
-.selected text, .hover text {
-  font-weight: bold;
-}
-#legend, #controls {
-  position: absolute;
-  overflow: visible;
-}
-.primary {
-  text-transform: uppercase;
-}
-text.hover, .title{ 
-  font-weight: bold;
-  }
-/*
-.primary.doc:hover, .primary.doc {
-  stroke: #000;
-  stroke-width: 1px;
-  stroke-opacity: 1.0;
-  shape-rendering: crispEdges;
-}*/
-.logo-word {
-  background-image: url('/img/inpho_logo.png');
-  background-size: 172px 92px;
-  width: 172px;
-  height: 84px;
-  padding-top: 6px;
-  margin-top: 14px;
-  margin-bottom: 15px;
-  margin-left: -6px;
-  display: inline-block;
-  text-indent: -3000px;
-}
-h1 {
-text-align: center;
-margin-bottom: 0;
-font-size: 59px;
-line-height: 1;
-color: inherit;
-letter-spacing: -1px;
-
-}
-h1 a, h1 a:hover {
-  color: #000;
-  text-decoration: none;
-}
-
-.btn {
-  vertical-align: middle;
-  margin-top: 2px;
-}
-#twitter-widget-0 {
-  margin-bottom: -11px;
-}
-.null, .non-null {
-  display: none;
-  }
-.formula {
-  font-variant: small-caps;
-  }
-.formula em {
-  font-variant: normal;  
-}
-
-.popover-content {
-  max-height: 250px;
-  overflow-y: scroll;
-}
-
-</style>
 </head>
 
 <body>
@@ -169,11 +27,11 @@ h1 a, h1 a:hover {
   <button class="btn" type="button" id="helpBtn"><span class="icon-question-sign"></span></button>
   <div class="input-append">
     <input type="hidden" name="doc" id="hidden_id">
-    <input type="text" id="doc" class="typeahead input-xlarge" placeholder="Document" autocomplete="off">
+    <input type="text" id="doc" class="typeahead input-xlarge" placeholder="Documento" autocomplete="off">
     <button class="btn" type="button" id="randomDoc"><span class="icon-random"></span></button>
   </div>
   <div class="btn-group">
-    <button type="submit" id="submit" class="btn">Visualize</button>
+    <button type="button" id="submit" class="btn" >Visualizar</button>
     <a class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
     <ul class="dropdown-menu">
     {% for k in topics_range %}
@@ -256,7 +114,6 @@ else
 function visualize(k) {
   var url = "{0}//{1}:8000/topic_explorer/doc/{2}/".format(window.location.protocol, window.location.hostname, k);
 
-  /*url += "?doc=" + encodeURIComponent($("#hidden_id").val() || docid) ;*/
   url += encodeURIComponent($("#hidden_id").val() || docid) ;
   window.location = url;
 }
@@ -311,11 +168,11 @@ $.getJSON('/topic_explorer/docs.json', function(data) {
 
 <div id="chart"> </div>
 <div id="controls" style="display:none;">
-  <strong>Display Options</strong>
-  <label class="checkbox"><input class="sort" type="checkbox"> Alphabetical sort</label>
-  <label class="checkbox"><input class="scale" type="checkbox"> Normalize topic bars</label>
-  <button class="btn reset" onclick="resetTopicSort()" disabled>Reset Topic Sort</button><br>
-  <button class="btn topdoc" style="display:none">Top Documents for [Topic]</button>
+  <strong>Opciones</strong>
+  <label class="checkbox"><input class="sort" type="checkbox"> Orden alfabético</label>
+  <label class="checkbox"><input class="scale" type="checkbox"> Normalizar barras de tópicos</label>
+  <button class="btn reset" type="button" onclick="resetTopicSort()" disabled>Restaurar orden de tópicos</button><br>
+  <button class="btn topdoc" type='button' style="display:none">Ordenar documentos para tópico [Topic]</button>
 </div>
 
 <!--<script src="topics.js"></script>-->
@@ -436,7 +293,7 @@ d3.json(url, function(error, data) {
       $('#status .bar-danger').addClass('bar-error').text('Could not load topic list.');
       return false;
     }
-    $('#submit').text(d3.keys(topics).length + ' Topicos');
+    $('#submit').text(d3.keys(topics).length + ' Tópicos');
     
   
     var legendCols = Math.max(Math.ceil(d3.keys(topics).length / Math.min(data.length, maxRows)), minCols);
@@ -474,7 +331,6 @@ d3.json(url, function(error, data) {
         .call(yAxis)
         .selectAll("text")
         .attr("class", function(d) { return (d == docid && roottopic != null) ? "primary" : "" })
-        //.on("click", function(d) { window.location.href = "/?doc=" + d;})
         .on("click", function(d) { window.location.href = "topic_explorer/doc/" + d;})
   
     svg.select(".y.axis").selectAll("g")
@@ -767,8 +623,8 @@ d3.json(url, function(error, data) {
       $('.reset').removeAttr('disabled');
       $('.topdoc').text('Top Documents for Topic ' + topic);
       $('.topdoc').show();
-      //$('.topdoc').click(function URL() {location.href = location.origin + '?topic=' + topic;});
-      $('.topdoc').click(function URL() {location.href = location.origin + '/topic_explorer/topic/{{k_param}}/' + topic;});
+      //$('.topdoc').click(function URL() {console.log("COMETNTADO"); location.href = location.origin + '?topic=' + topic;});
+      $('.topdoc').click(function URL() {console.log("ACTIVO"); location.href = location.origin + '/topic_explorer/topic/{{k_param}}/' + topic;});
       $('.topdoc').mouseenter(function() {
           $('.legend rect').not('.top_' + topic).tooltip('hide');
           $(".legend rect.top_" + topic).tooltip('show'); });

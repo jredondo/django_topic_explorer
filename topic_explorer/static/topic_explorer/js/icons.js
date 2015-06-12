@@ -11,7 +11,6 @@ var icon_fns = {"link" : function(ticks, i) {
       base_fn(ticks,i)
         .attr("xlink:href","/static/topic_explorer/img/link.png")
         .attr("class", "linkIcon icon")
-        //.on("click", function(d) { window.location.href = "/?doc=" + encodeURIComponent(d);});
         .on("click", function(d) { window.location.href = "topic_explorer/doc/" + encodeURIComponent(d);});
   },
  "ap" : function(ticks, i) {

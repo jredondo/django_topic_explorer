@@ -14,17 +14,15 @@ from vsm.viewer.wrappers import doc_label_name
 
 
 
-path = settings.PATH 
+#path = settings.PATH 
 corpus_file = settings.CORPUS_FILE
 context_type = settings.CONTEXT_TYPE
 model_pattern = settings.MODEL_PATTERN
 topics = settings.TOPICS
 corpus_name = settings.CORPUS_NAME
 icons = settings.ICONS
-#path = 'logs/aux/{0}.log'
 
 corpus_link = settings.CORPUS_LINK
-#topic_range = settings.TOPIC_RANGE
 topics_range = [int(item) for item in settings.TOPICS.split(',')]
 doc_title_format = settings.DOC_TITTLE_FORMAT
 doc_url_format = settings.DOC_URL_FORMAT
@@ -46,11 +44,8 @@ def dump_exception():
     traceback.print_exception(exc_type, exc_value, exc_traceback, limit=2, file=sys.stdout)
     return HttpResponseServerError(str(exc_value))
 
-# Create your views here.
 
 def doc_topic_csv(request, doc_id):
-    #response.content_type = 'text/csv; charset=UTF8'
-
     data = lda_v.doc_topics(doc_id)
 
     output=StringIO()
@@ -61,8 +56,6 @@ def doc_topic_csv(request, doc_id):
     return HttpResponse(output.getvalue())
 
 def doc_csv(request, doc_id, threshold=0.2):
-    #response.content_type = 'text/csv; charset=UTF8'
-
     data = lda_v.sim_doc_doc(doc_id)
 
     output=StringIO()
@@ -76,7 +69,6 @@ def topic_json(request,k_param,topic_no, N=40):
     global lda_v
     lda_m = LCM.load(model_pattern.format(k_param))
     lda_v = LDAViewer(lda_c, lda_m)
-    #response.content_type = 'application/json; charset=UTF8'
     try:
         N = int(request.query.n)
     except:
@@ -105,9 +97,6 @@ def doc_topics(request,doc_id, N=40):
             N = int(request.query.n)
         except:
             pass
-
-        #response.content_type = 'application/json; charset=UTF8'
-
         if N > 0:
             data = lda_v.dist_doc_doc(doc_id)[:N]
         else:
@@ -129,9 +118,6 @@ def doc_topics(request,doc_id, N=40):
 
 def topics(request):
     try:
-        #response.content_type = 'application/json; charset=UTF8'
-        #response.set_header('Expires', _cache_date())
-
         # populate entropy values
         data = lda_v.topic_oscillations()
 
@@ -156,8 +142,6 @@ def topics(request):
         return dump_exception()
 
 def docs(request):
-    #response.content_type = 'application/json; charset=UTF8'
-    #response.set_header('Expires', _cache_date())
     try:
         docs = lda_v.corpus.view_metadata(context_type)[doc_label_name(context_type)]
         js = list()
