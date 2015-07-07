@@ -12,6 +12,9 @@ from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
 from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
 from vsm.viewer.wrappers import doc_label_name
 
+from StringIO import StringIO
+import csv
+
 
 
 #path = settings.PATH 
@@ -55,7 +58,9 @@ def doc_topic_csv(request, doc_id):
 
     return HttpResponse(output.getvalue())
 
-def doc_csv(request, doc_id, threshold=0.2):
+def doc_csv(request, k_param,doc_id,threshold=0.2):
+    lda_m = LCM.load(model_pattern.format(k_param))
+    lda_v = LDAViewer(lda_c, lda_m)
     data = lda_v.sim_doc_doc(doc_id)
 
     output=StringIO()
@@ -66,7 +71,7 @@ def doc_csv(request, doc_id, threshold=0.2):
     return HttpResponse(output.getvalue())
 
 def topic_json(request,k_param,topic_no, N=40):
-    global lda_v
+    #global lda_v
     lda_m = LCM.load(model_pattern.format(k_param))
     lda_v = LDAViewer(lda_c, lda_m)
     try:
@@ -135,7 +140,7 @@ def topics(request):
         # populate word values
         data = lda_v.topics()
         for i,topic in enumerate(data):
-            js[str(i)].update({'words' : dict([(w, p) for w,p in topic[:10]])})
+            js[str(i)].update({'words' : dict([(w, p) for w,p in topic[:20]])})
 
         return HttpResponse(json.dumps(js))
     except:

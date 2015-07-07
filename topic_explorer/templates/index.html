@@ -275,6 +275,7 @@ if (n) url += "?n=" + n;
 
 var tops;
 d3.json(url, function(error, data) {
+  console.log(data);
   $('#status .bar').css('width', '50%').text('Loading topics...');
   if (error) {
     $('#status .progress').removeClass('active progress-striped');

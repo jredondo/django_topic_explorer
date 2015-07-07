@@ -8,7 +8,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^doc_topics/(?P<doc_id>\d+)/$', doc_topic_csv, name='doc_topic_csv'),
-    url(r'^docs/(?P<doc_id>)\d+/$',doc_csv , name='doc_csv'),
+    url(r'^docs/(?P<k_param>\d+)/(?P<doc_id>.+)/$',doc_csv , name='doc_csv'),
     url(r'^topics/(?P<k_param>\d+)/(?P<topic_no>\d+)/$', topic_json , name='topic_json'),
     url(r'^docs_topics/(?P<doc_id>.+)/$', doc_topics , name='doc_topics'),
     url(r'^topics.json/$', topics , name='topics'),
