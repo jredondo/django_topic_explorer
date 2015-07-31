@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %}Elegir Tópico {% endblock %}
+{%block headScriptCss%}
+    <script src="{% static "topic_explorer/js/lib/jquery-1.11.0.min.js" %}"></script>
+    <script src="{% static "topic_explorer/bootstrap-2.3.2/js/bootstrap.min.js" %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static "topic_explorer/bootstrap-2.3.2/css/bootstrap.min.css" %}"/>
+
+{%endblock%}
+{% block body %}
+    <form method="post" action="{%url 'topicos' %}" class="form-inline">
+        {% csrf_token %}
+        <input type="text" name="propuesta" value="{{propuesta}}" readonly="readonly">
+        <select name="topico" id="topicos">
+            {% for x in llaves %}
+                <option value="{{x}}" id="opCol{{x}}">Topic {{forloop.counter}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="buscar" class="btn">
+    </form>
+    
+    <script>
+        var mi_color={{color|safe}};
+        for (element in mi_color) {
+            $("#topicos option[value="+element+"]").css('background-color',mi_color[element]);
+        }
+    </script>
+{% endblock %}
+
+
+

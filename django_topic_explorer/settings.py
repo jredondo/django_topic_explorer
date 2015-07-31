@@ -10,7 +10,11 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+
+TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
 
 
 # Quick-start development settings - unsuitable for production
@@ -37,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'topic_explorer',
+    'see_topic',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -89,15 +94,23 @@ STATICFILES_DIRS = (
 )
 
 TEMPLATE_DIRS = (
-            os.path.join(BASE_DIR, '../topic_explorer/templates'),
+            TEMPLATE_PATH,
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django_topic_explorer.context_processors.baseurl",
+)
+
+#url comun para el proyecto
+URL_COMUN='http://localhost:8000/'
 ## TOPIC EXPLORER SETTINGS
-TOPIC_EXPLORER_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/'
+#TOPIC_EXPLORER_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/'
+TOPIC_EXPLORER_PATH = '/home/cenditel/Interpretacion/'
+FILES_PATH = TOPIC_EXPLORER_PATH +'demo-data/corpus_propuestas/pp'
 MODELS_PATH = TOPIC_EXPLORER_PATH + 'demo-data/corpus_propuestas/models/'
 CORPUS_FILE = MODELS_PATH + 'pp-nltk-en-freq5.npz'
 #CORPUS_FILE = MODELS_PATH + 'ap-nltk-en-freq5.npz'
-MODEL_PATTERN = MODELS_PATH + 'pp-nltk-en-freq5-LDA-K{0}-document-400.npz'
+MODEL_PATTERN = MODELS_PATH + 'pp-nltk-en-freq5-LDA-K{0}-document-200.npz'
 #MODEL_PATTERN = MODELS_PATH + 'ap-nltk-en-freq5-LDA-K{0}-document-20.npz'
 CONTEXT_TYPE = 'document'
 TOPICS = '10, 20, 30, 40, 50, 60, 70'

@@ -5,17 +5,23 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, StreamingHttpResponse
 
 import json
-import colorlib
+
+from utils import colorlib
 import itertools
 from vsm.corpus import Corpus
 from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
 from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
 from vsm.viewer.wrappers import doc_label_name
 
+from django.views.generic import TemplateView
+from django.core.urlresolvers import reverse
+
 from StringIO import StringIO
 import csv
 
-
+import requests
+from django_topic_explorer.settings import URL_COMUN
+from django.utils.safestring import mark_safe
 
 #path = settings.PATH 
 corpus_file = settings.CORPUS_FILE
@@ -164,8 +170,8 @@ def index(request):
     global lda_m,lda_v
     lda_m = LCM.load(model_pattern.format(10))
     lda_v = LDAViewer(lda_c, lda_m)
-    template = 'index.html'
-    return render(request,template,
+    template_name = 'topic_explorer/index.html'
+    return render(request,template_name,
         {'filename':None,
          'corpus_name' : corpus_name,
          'corpus_link' : corpus_link,
@@ -178,8 +184,8 @@ def visualize(request,k_param,filename=None,topic_no=None):
     global lda_m,lda_v
     lda_m = LCM.load(model_pattern.format(k_param))
     lda_v = LDAViewer(lda_c, lda_m)
-    template = 'index.html'
-    return render(request,template,
+    template_name = 'topic_explorer/index.html'
+    return render(request,template_name,
         {'filename':filename,
          'k_param':k_param,
          'topic_no':topic_no,
@@ -190,4 +196,32 @@ def visualize(request,k_param,filename=None,topic_no=None):
          'doc_title_format' : doc_title_format,
          'doc_url_format' : doc_url_format})
 
-
+class IrTopic(TemplateView):
+    template_name='see_topic/index.html'
+    def post(self, request, *args, **kwargs):
+        propuesta = request.POST['nombre_propuesta']
+        url = reverse('topics')
+        #Obtnener json
+        r = requests.get(
+          URL_COMUN+'topic_explorer/topics.json?format=json', 
+        )
+        topicos = json.loads(r.content)
+        mi_color = []
+        mi_color = self.obtenerValores(topicos)
+        mi_color = json.dumps(mi_color)
+        print mi_color
+        #obtener las llaves  para iterar en el select del index.html
+        llaves=[]
+        for x in topicos:
+            llaves.append(x)
+        llaves.sort()
+        return render(request,'see_topic/index.html',
+                      {'propuesta':propuesta,
+                       'llaves':llaves,
+                       'color':mi_color})
+    
+    def obtenerValores(self,topicos):#funcion para obtener los colores del json
+        my_topic=[]
+        for x in topicos:
+            my_topic.append(topicos[x]['color'])
+        return my_topic
