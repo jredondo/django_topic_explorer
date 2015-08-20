@@ -24,10 +24,9 @@ def call_freeling(freeling_cmd,file_string):
 
     return output
 
-
-def clean_words(words_fl):
-    words_fl = [w.encode('unicode-escape') for w in words_fl]
-    return [w.replace(u'\xe0'.encode('unicode-escape'),u'a').replace(u'\xe8'.encode('unicode-escape'),u'e').replace(u'\xec'.encode('unicode-escape'),u'i').replace(u'\xf2'.encode('unicode-escape'),u'o').replace(u'\xfa'.encode('unicode-escape'),u'u').replace(u'\xe1'.encode('unicode-escape'),u'a').replace(u'\xe9'.encode('unicode-escape'),u'e').replace(u'\xed'.encode('unicode-escape'),u'i').replace(u'\xf3'.encode('unicode-escape'),u'o').replace(u'\xfa'.encode('unicode-escape'),u'u').replace(u'á',u'a').replace(u'é',u'e').replace(u'í',u'i').replace(u'ó',u'o').replace(u'ú',u'u').replace(u'à',u'a').replace(u'è',u'e').replace(u'ì',u'i').replace(u'ò',u'o').replace(u'ù',u'u') for w in words_fl if w not in stopwords.words('spanish') and w not in '*+.,?¿!¡":;-=/$@#“”()[]{}' and not w.isdigit() and len(w) > 3]
+def clean_words(w):
+    w = w.encode('unicode-escape')
+    return w.replace(u'\xe0'.encode('unicode-escape'),u'a').replace(u'\xe8'.encode('unicode-escape'),u'e').replace(u'\xec'.encode('unicode-escape'),u'i').replace(u'\xf2'.encode('unicode-escape'),u'o').replace(u'\xfa'.encode('unicode-escape'),u'u').replace(u'\xe1'.encode('unicode-escape'),u'a').replace(u'\xe9'.encode('unicode-escape'),u'e').replace(u'\xed'.encode('unicode-escape'),u'i').replace(u'\xf3'.encode('unicode-escape'),u'o').replace(u'\xfa'.encode('unicode-escape'),u'u').replace(u'á',u'a').replace(u'é',u'e').replace(u'í',u'i').replace(u'ó',u'o').replace(u'ú',u'u').replace(u'à',u'a').replace(u'è',u'e').replace(u'ì',u'i').replace(u'ò',u'o').replace(u'ù',u'u')
 
 def is_pos(word,pos_list):
     for item in pos_list:
@@ -39,7 +38,6 @@ def complete_word(words_list,word):
     if len(indexes) == 1: return word
     if len(indexes) == 0: return word
 
-    #if len(indexes) == 0: raise Exception("LA PALABRA NO SE ENCUENTRA EN EL DOCUMENTO: cosa rara!")
     index = 1
     complete_word = word
     i1 = indexes[0]
@@ -70,29 +68,37 @@ def all_complete_words(words_list):
 
 
 
-def select_pos(words_fl,pos_list=['V','A','N','R','D','P','C','I','S']):
+def select_pos(path,words_fl,pos_list=['V','A','N','R','D','P','C','I','S']):
     output_list = []
+    all_words_list = []
     for item in words_fl.split('\n'):
         try:
-            if item.split(' ')[0].decode('utf8') not in stopwords.words('spanish') and is_pos(item.split(' ')[2],pos_list):
+            w = item.split(' ')[0] 
+            cleaned_word = clean_words(w.decode('utf8'))
+            all_words_list += [cleaned_word]
+            if w.decode('utf8') not in stopwords.words('spanish') and is_pos(item.split(' ')[2],pos_list) and w not in '*+.,?¿!¡":;-=/$@#“”()[]{}' and not w.isdigit() and len(w) > 3:
                 # Selecciona el lema
                 #output_list += [item.split(' ')[1]]
                 # Selecciona la palabra original
-                output_list += [item.split(' ')[0]]
+                #output_list += [item.split(' ')[0]]
+                output_list += [cleaned_word]
         except IndexError:
             pass
+    na_file = open(path,'w','utf8')
+    na_file.write(' '.join(all_words_list))
+    na_file.close()
     return output_list 
 
-
 def preprocess(corpus_path,do_fl=True):
-    freeling_cmd = shlex.split('/home/jredondo/Proyectos/Analisis_del_Discurso/src/freeling/bin/analyzer -f /home/jredondo/Proyectos/Analisis_del_Discurso/src/freeling/share/freeling/config/es.cfg',' ')
     freeling_corpus_path = corpus_path + '../freeling/'
+    no_accent_path = corpus_path + '../noaccent/'
     ret_val = dict()
     corpus_words = []
     i = 0
     for file in os.listdir(corpus_path):
         file_string = open(corpus_path+file,'r','utf8').read()
         if do_fl:
+            freeling_cmd = shlex.split('/home/jredondo/Proyectos/Analisis_del_Discurso/src/freeling/bin/analyzer -f /home/jredondo/Proyectos/Analisis_del_Discurso/src/freeling/share/freeling/config/es.cfg',' ')
             # Lematización con FREELING
             words_fl = call_freeling(freeling_cmd,file_string)
             fl_file = open(freeling_corpus_path+file,'w','utf8')
@@ -111,20 +117,16 @@ def preprocess(corpus_path,do_fl=True):
         #'C', conjunciones
         #'I', interjecciones
         #'S', preposiciones
-        words_fl = select_pos(words_fl=words_fl,pos_list=['A','R','V','N'])
         ####################################
         ####################################
+
+        words_fl = select_pos(no_accent_path+file,words_fl=words_fl,pos_list=['A','R','V','N'])
+
         # Quitar STOPWORDS y caracteres no deseados
         words_pp = all_complete_words(words_fl)
-        words_pp = clean_words(words_pp)
         ret_val[file] = words_pp
         corpus_words += words_pp
         i += 1
-        #print "Pre-procesado el archivo: " + file
-        #print "####################################"
-        #print words_pp , '(' + str(i) + ')'
-        #print "####################################"
-        #print "####################################"
 
     return ret_val,set(corpus_words)
 
@@ -145,15 +147,14 @@ if __name__ == '__main__':
     path_dest = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/lower/'
     files_to_lower(path_orig,path_dest)
     """
-    corpus_path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/'
+    #corpus_path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/'
+    corpus_path = '/home/cenditel/Interpretacion/demo-data/corpus_propuestas/'
     lower_corpus_path = corpus_path + 'lower/'
     pp_corpus_path = corpus_path + 'pp/'
  
     file_words_pp,corpus_words = preprocess(lower_corpus_path,do_fl=False) 
     exclude_words = ['descripcion','justificacion','construccion','desarrollo','comunidad','comunal','proyecto','prueblo','desarrollar','mismo','nacional','pueblo','sistema']
     exclude_words = [w.encode('utf8') for w in exclude_words]
-    #vocab_idf = idf(file_words_pp,corpus_words)
-    #print sorted(vocab_idf.items(),key=operator.itemgetter(1), reverse=True)
     excluded = open(corpus_path+'excluded.txt','w','utf8')
     added_files = []
     repeated_count = 0
@@ -170,33 +171,19 @@ if __name__ == '__main__':
             flag = False
             continue
              
-        #coef = float(len(set(words_pp)))/float(len(words_pp))
-        #print coef, len(words_pp), file
-        #if (coef <= 0.5) or len(words_pp) <= 150: continue
         if len(words_pp) <= 50: continue
         # Guardar archivo 
         file_pp = open(pp_corpus_path+file,'w','utf8')
         added_files.append(words_pp)
-        for w in words_pp:
-            #condition = vocab_idf[w]
-            #if condition >= 2.0 and condition <= 6.1 and not '_' in w:
-            #if condition >= 2.0 and not '_' in w:
-        
+        for w in words_pp:        
             if w not in exclude_words and not '_' in w:
-
-                #try:
-                #    file_pp.write(w.encode('utf8') + ' ')
-                #except UnicodeDecodeError:
                 file_pp.write(w + ' ')
             else:
                 try:
-                    #excluded.write(w.encode('utf8') + ' ' + str(condition) + ' (' + file + ')\n')
                     excluded.write(w.encode('utf8') + ' (' + file + ')\n')
                 except UnicodeDecodeError:
-                    #excluded.write(w + ' ' + str(condition) + ' (' + file + ')\n')
                     excluded.write(w + ' (' + file + ')\n')
         file_pp.close()
     excluded.close()
    
-    print "Documentos repetidos: ", repeated_count
-    print "Palabras en el vocabulario: ", len(corpus_words)
+

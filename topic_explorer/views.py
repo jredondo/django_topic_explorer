@@ -22,6 +22,7 @@ import csv
 import requests
 from django_topic_explorer.settings import URL_COMUN
 from django.utils.safestring import mark_safe
+from django_topic_explorer.settings import FILES_PATH
 
 #path = settings.PATH 
 corpus_file = settings.CORPUS_FILE
@@ -209,16 +210,28 @@ class IrTopic(TemplateView):
         mi_color = []
         mi_color = self.obtenerValores(topicos)
         mi_color = json.dumps(mi_color)
-        print mi_color
         #obtener las llaves  para iterar en el select del index.html
         llaves=[]
         for x in topicos:
-            llaves.append(x)
+            llaves.append(int(x))
         llaves.sort()
+        topicos = json.dumps(topicos)
+        print topicos
+        #carga el pre-procesado del archivo en una variable
+        texto=''
+        direccion = FILES_PATH + '/'+ propuesta
+        try:
+            archivo = open(direccion,'r')
+            texto=archivo.read()
+            archivo.close()
+        except:
+            text='No se encontro el documento'
         return render(request,'see_topic/index.html',
-                      {'propuesta':propuesta,
+                      {'topicos':topicos,
+                       'propuesta':propuesta,
                        'llaves':llaves,
-                       'color':mi_color})
+                       'color':mi_color,
+                       'texto':texto})
     
     def obtenerValores(self,topicos):#funcion para obtener los colores del json
         my_topic=[]

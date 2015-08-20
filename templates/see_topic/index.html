@@ -1,12 +1,15 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% block title %}Elegir Tópico {% endblock %}
-{%block headScriptCss%}
-    <script src="{% static "topic_explorer/js/lib/jquery-1.11.0.min.js" %}"></script>
-    <script src="{% static "topic_explorer/bootstrap-2.3.2/js/bootstrap.min.js" %}"></script>
-    <link rel="stylesheet" type="text/css" href="{% static "topic_explorer/bootstrap-2.3.2/css/bootstrap.min.css" %}"/>
-
-{%endblock%}
+{% block headScriptCss %}
+    <style>
+        .Aligner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+    </style>
+{% endblock %}
 {% block body %}
     <form method="post" action="{%url 'topicos' %}" class="form-inline">
         {% csrf_token %}
@@ -16,13 +19,198 @@
                 <option value="{{x}}" id="opCol{{x}}">Topic {{forloop.counter}}</option>
             {% endfor %}
         </select>
-        <input type="submit" value="buscar" class="btn">
     </form>
+    <div id="contenedor" class="Aligner">
+        <div id="texto" style="float:left;width:80%">
+            
+        </div>
+        <div id="topic" style="float:left;width:20%">
+            
+        </div>
+    </div>
     
     <script>
+        $(document).ready(function(){
+            d3.select('#texto')
+                .append('p').text(texto);
+         });   
         var mi_color={{color|safe}};
+        var texto = "{{texto}}";
+        var topicos = {{topicos|safe}};
+        var color = new Array();
+        var palabras_json = new Array();
+        var llaves = {{llaves}};
+        llenar_array(topicos,color,palabras_json)
+        var palabras = new Array();
+        palabras=texto.split(' ');
+        
+        var cantidad = parseInt(color.length/2)+1;
+        var total = parseInt(color.length);
+        
+        var width = 200;
+        var height = 500;
+                        
+        var canvas = 
+        d3.select('#topic')
+                .append('svg')
+                .attr('width',width)
+                .attr('height',height);
+                
+        var tam = 18;
+        var minimo = 10;
+        cont = 0;
+        //createBlocks(canvas,llaves,tam,color,cantidad,50,minimo,topicos);
+        //createBlocks(canvas,llaves,tam,color,cantidad,90,minimo*2,topicos);
+        if (total<11) {
+            createBlocks(canvas,llaves,tam,color,cantidad,50,minimo,topicos);
+            createBlocks(canvas,llaves,tam,color,cantidad,90,minimo,topicos);
+        }
+        else if (total>10 && total<51) {
+            createBlocks(canvas,llaves,tam,color,cantidad,50,minimo*2,topicos);
+            createBlocks(canvas,llaves,tam,color,cantidad,90,minimo*2,topicos);
+        }
+        else{
+            cantidad = parseInt(color.length/3)+1;
+            if (total>60) {
+                cantidad = parseInt(color.length/3)+2;
+            }        
+            console.log(cantidad);
+            createBlocks(canvas,llaves,tam,color,cantidad,50,minimo*2,topicos);
+            createBlocks(canvas,llaves,tam,color,cantidad,90,minimo*2,topicos);
+            if (total>60) {
+                cantidad-=2;
+            }
+            createBlocks(canvas,llaves,tam,color,cantidad,130,minimo*2,topicos);
+        }
+        
+        
         for (element in mi_color) {
             $("#topicos option[value="+element+"]").css('background-color',mi_color[element]);
+        }
+        var select_topicos = parseInt($('#topicos option:selected').val());
+        
+        $('.group').mouseover(function(){
+            $(this).find('text').css('font-weight','bold');
+            $(this).find('rect').css({'stroke':'black','stroke-width':'2px'});
+            $(this).tooltip();
+            });
+        $('.group').mouseout(function(){
+            $(this).find('text').css('font-weight','normal');
+            $(this).find('rect').css('stroke','none');
+            });
+        $('.group').click(function(){
+            var palabra = new Array();
+            var probabilidad = new Array();
+            var id = $(this).attr('id');
+            getWordProb(palabras_json[id],palabra,probabilidad);
+            d3.select('#texto')
+                .selectAll('p').remove();
+            d3.select('#texto')
+                .selectAll('span').remove();
+            crear_texto(palabras,palabra,probabilidad,color[id]);            
+            });
+        
+        $('.myRect').tooltip({
+                'container': 'body',
+                'placement': 'right'
+        });
+        
+        //Funcion para obtener las palabras y probabilidades de un item clickeado
+        function getWordProb(palabras_json,palabra,probabilidad) {
+
+            for(element in palabras_json)
+            {
+                palabra.push(element)
+                var prob = parseFloat(palabras_json[element]);
+                probabilidad.push(prob*400);
+            }            
+        }
+        
+        
+        function llenar_array(topicos,color,palabras_json) {
+            for (element in topicos)
+            {
+                item = new Array();
+                item.push(topicos[element]['words'])
+                color.push(topicos[element]['color']);
+                palabras_json[element]=item[0];
+            }
+        }
+        
+        function crear_texto(palabras,palabra,probabilidad,color) {
+            for(element in palabras)
+            {
+                var bool= false;
+                var mycolor;
+                for (x in palabra)
+                {
+                    if (palabras[element]==palabra[x]) {
+                        bool=true;
+                        mycolor=x;
+                    }
+                }
+                if (bool)
+                {
+                    var font = 12*probabilidad[mycolor];
+                    font+="pt";
+                    console.log(font);
+                    d3.select("#texto")
+                        .append("span").text(palabras[element]+" ")
+                        .style('color',color).style('font-size', font);
+                }
+                else
+                {
+                    d3.select("#texto")
+                        .append("span").text(palabras[element]+" ")
+                }
+            }
+        }
+        
+        //Funcion para crear los bloques del D3
+        function createBlocks(canvas,datas,tam,fill,cantidad,movX,minimo,topicos)
+        {
+            for (var j = 1;j<cantidad;j++)
+            {
+                var group = canvas.append('g')
+                    .attr('class','group')
+                    .attr('id',cont)
+                
+                myStr = ArrayToString(topicos,cont);
+                                
+                var rect = canvas.selectAll('rect')
+                    .data(datas)
+                    .enter()
+                        group.append('rect')
+                            .attr('width',tam)
+                            .attr('height',tam)
+                            .attr('title',myStr)
+                            .attr('y',j*(tam+2))
+                            .attr('x',function(d,i){return (i+1)*movX;})
+                            .attr('fill',color[cont])
+                            .attr('class','myRect')
+                        group.append('text')
+                            .text(cont)
+                            .attr('y',j*(tam+2))
+                            .attr('x',movX-minimo)
+                            .attr('dy','13');
+                cont ++;
+            }
+        }
+        
+        //Funcion para crear la data de los tooltip
+        function ArrayToString(data,indice) {
+            var myString='';
+            var i=0;
+            for (x in data[indice]['words']) {
+                    if (i>2) {
+                        myString+="\n"
+                    }
+                    myString+=x;
+                    myString+=",";
+                    i++;
+                }
+            myString = myString.substr(0,(myString.length-1));  
+            return myString;
         }
     </script>
 {% endblock %}
