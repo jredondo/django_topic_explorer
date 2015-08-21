@@ -8,32 +8,31 @@
             align-items: center;
             justify-content: center;
           }
+          .titulo
+          {
+            text-align: center;
+            
+          }
     </style>
 {% endblock %}
 {% block body %}
-    <form method="post" action="{%url 'topicos' %}" class="form-inline">
-        {% csrf_token %}
-        <input type="text" name="propuesta" value="{{propuesta}}" readonly="readonly">
-        <select name="topico" id="topicos">
-            {% for x in llaves %}
-                <option value="{{x}}" id="opCol{{x}}">Topic {{forloop.counter}}</option>
-            {% endfor %}
-        </select>
-    </form>
+    <div class="titulo">
+        <h3>{{propuesta}}</h3><hr>
+    </div>
     <div id="contenedor" class="Aligner">
         <div id="texto" style="float:left;width:80%">
             
         </div>
-        <div id="topic" style="float:left;width:20%">
-            
+        <div id="contenedor" style="float:left;width:15%">
+            <div class="btn-group" align="center" style="width: 80%">
+                <button class="btn" id="verTodos">Ver Todos</button>
+            </div>
+            <div id="topic">
+            </div>
         </div>
     </div>
     
-    <script>
-        $(document).ready(function(){
-            d3.select('#texto')
-                .append('p').text(texto);
-         });   
+    <script> 
         var mi_color={{color|safe}};
         var texto = "{{texto}}";
         var topicos = {{topicos|safe}};
@@ -43,12 +42,20 @@
         llenar_array(topicos,color,palabras_json)
         var palabras = new Array();
         palabras=texto.split(' ');
+        var allTopics = new Array();
+        $(document).ready(function(){
+            d3.select('#texto')
+                .append('p').text(texto);
+            arreglo_global(allTopics,color,palabras_json);
+         });  
         
         var cantidad = parseInt(color.length/2)+1;
         var total = parseInt(color.length);
         
+        var tam = 18;
+        var minimo = 10;
         var width = 200;
-        var height = 500;
+        var height = cantidad*20;
                         
         var canvas = 
         d3.select('#topic')
@@ -56,11 +63,8 @@
                 .attr('width',width)
                 .attr('height',height);
                 
-        var tam = 18;
-        var minimo = 10;
+
         cont = 0;
-        //createBlocks(canvas,llaves,tam,color,cantidad,50,minimo,topicos);
-        //createBlocks(canvas,llaves,tam,color,cantidad,90,minimo*2,topicos);
         if (total<11) {
             createBlocks(canvas,llaves,tam,color,cantidad,50,minimo,topicos);
             createBlocks(canvas,llaves,tam,color,cantidad,90,minimo,topicos);
@@ -74,7 +78,6 @@
             if (total>60) {
                 cantidad = parseInt(color.length/3)+2;
             }        
-            console.log(cantidad);
             createBlocks(canvas,llaves,tam,color,cantidad,50,minimo*2,topicos);
             createBlocks(canvas,llaves,tam,color,cantidad,90,minimo*2,topicos);
             if (total>60) {
@@ -108,6 +111,13 @@
             d3.select('#texto')
                 .selectAll('span').remove();
             crear_texto(palabras,palabra,probabilidad,color[id]);            
+            });
+        $('#verTodos').click(function(){
+            d3.select('#texto')
+                .selectAll('p').remove();
+            d3.select('#texto')
+                .selectAll('span').remove();
+            create_all_text(palabras,allTopics); 
             });
         
         $('.myRect').tooltip({
@@ -153,7 +163,6 @@
                 {
                     var font = 12*probabilidad[mycolor];
                     font+="pt";
-                    console.log(font);
                     d3.select("#texto")
                         .append("span").text(palabras[element]+" ")
                         .style('color',color).style('font-size', font);
@@ -212,6 +221,79 @@
             myString = myString.substr(0,(myString.length-1));  
             return myString;
         }
+        //Se crea el arreglo con todas las palabras y su mayor probabilidad
+        function arreglo_global(allTopics,color,palabras_json){
+            for(element in palabras_json)
+            {
+                for(palabra in palabras_json[element])
+                {
+                    var bool=comprobar(allTopics,palabra);
+                    var prob=palabras_json[element][palabra];
+                    if (bool[0]) {
+                        var pos=bool[1];
+                        if (allTopics[pos][1]<prob)
+                        {
+                            allTopics[pos][1]=prob;
+                            allTopics[pos][2]=color[element];
+                        }
+                    }
+                    else
+                    {
+                        var valor = new Array();
+                        valor.push(palabra,prob,color[element]);
+                        allTopics.push(valor);
+                    }
+                }
+            }
+        }
+        //Funcion para comprobar si una palabra esta en el arreglo
+        function comprobar(allTopics,word)
+        {
+            var bool = false;
+            if(allTopics.length==0)
+            {
+                return [false,-1];
+            }
+            else
+            {
+                for (x in allTopics) {
+                    if (allTopics[x][0]==word) {
+                        bool = true;
+                        return [bool,x];
+                    }
+                }
+            }
+            return [bool,-1];
+        }
+        //Se crea todo el texto
+        function create_all_text(palabras,allTopics) {
+            for(element in palabras)
+            {
+                var bool= false;
+                var pos;
+                for (x in allTopics)
+                {
+                    if (palabras[element]==allTopics[x][0]) {
+                        bool=true;
+                        pos=x;
+                    }
+                }
+                if (bool)
+                {
+                    var font = 12*(allTopics[pos][1]*400);
+                    font+="pt";
+                    d3.select("#texto")
+                        .append("span").text(palabras[element]+" ")
+                        .style('color',allTopics[pos][2]).style('font-size', font);
+                }
+                else
+                {
+                    d3.select("#texto")
+                        .append("span").text(palabras[element]+" ")
+                }
+            }
+        }
+        
     </script>
 {% endblock %}
 
