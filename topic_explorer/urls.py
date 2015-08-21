@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^$', index , name='index'),
     url(r'^doc/(?P<k_param>\d+)/(?P<filename>.+)/$', visualize , name='visualize'),
     url(r'^topic/(?P<k_param>\d+)/(?P<topic_no>\d+)/$', visualize , name='visualize'),
+    url(r'^see_topic',IrTopic.as_view(),name='see_topic'),
 
 )
 

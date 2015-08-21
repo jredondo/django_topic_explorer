@@ -10,7 +10,6 @@ urlpatterns = patterns('',
 
     #url(r'^admin/', include(admin.site.urls)),
     url(r'^topic_explorer/', include('topic_explorer.urls')),
-    url(r'^see_topic/', include('see_topic.urls')),
 )
 """
 if settings.DEBUG:

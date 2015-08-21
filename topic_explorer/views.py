@@ -12,6 +12,7 @@ from vsm.corpus import Corpus
 from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
 from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
 from vsm.viewer.wrappers import doc_label_name
+from django.core import serializers
 
 from django.views.generic import TemplateView
 from django.core.urlresolvers import reverse
@@ -38,6 +39,7 @@ doc_title_format = settings.DOC_TITTLE_FORMAT
 doc_url_format = settings.DOC_URL_FORMAT
 
 #global lda_m, lda_v
+Topic_Json = {}
 
 
 lda_c = Corpus.load(corpus_file)
@@ -100,7 +102,6 @@ def topic_json(request,k_param,topic_no, N=40):
         doc, prob = doc_prob
         js.append({'doc' : doc, 'label': label(doc), 'prob' : 1-prob,
             'topics' : dict([(str(t), p) for t,p in topics])})
-
     return HttpResponse(json.dumps(js))
 
 def doc_topics(request,doc_id, N=40):
@@ -123,7 +124,6 @@ def doc_topics(request,doc_id, N=40):
             doc, prob = doc_prob
             js.append({'doc' : doc, 'label': label(doc), 'prob' : 1-prob,
                 'topics' : dict([(str(t), p) for t,p in topics])})
-
         return HttpResponse(json.dumps(js))
     except:
         return dump_exception()
@@ -148,7 +148,8 @@ def topics(request):
         data = lda_v.topics()
         for i,topic in enumerate(data):
             js[str(i)].update({'words' : dict([(w, p) for w,p in topic[:20]])})
-
+        global Topic_Json
+        Topic_Json = json.dumps(js)
         return HttpResponse(json.dumps(js))
     except:
         return dump_exception()
@@ -198,15 +199,13 @@ def visualize(request,k_param,filename=None,topic_no=None):
          'doc_url_format' : doc_url_format})
 
 class IrTopic(TemplateView):
-    template_name='see_topic/index.html'
+    template_name='topic_explorer/verTopico.html'
     def post(self, request, *args, **kwargs):
         propuesta = request.POST['nombre_propuesta']
-        url = reverse('topics')
+        #url = reverse('verTopicos')
         #Obtnener json
-        r = requests.get(
-          URL_COMUN+'topic_explorer/topics.json?format=json', 
-        )
-        topicos = json.loads(r.content)
+        global Topic_Json
+        topicos = json.loads(Topic_Json)
         mi_color = []
         mi_color = self.obtenerValores(topicos)
         mi_color = json.dumps(mi_color)
@@ -216,7 +215,7 @@ class IrTopic(TemplateView):
             llaves.append(int(x))
         llaves.sort()
         topicos = json.dumps(topicos)
-        print topicos
+        #print topicos
         #carga el pre-procesado del archivo en una variable
         texto=''
         direccion = FILES_PATH + '/'+ propuesta
@@ -226,7 +225,7 @@ class IrTopic(TemplateView):
             archivo.close()
         except:
             text='No se encontro el documento'
-        return render(request,'see_topic/index.html',
+        return render(request,self.template_name,
                       {'topicos':topicos,
                        'propuesta':propuesta,
                        'llaves':llaves,
