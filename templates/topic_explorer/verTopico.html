@@ -38,7 +38,6 @@
         var topicos = {{topicos|safe}};
         var color = new Array();
         var palabras_json = new Array();
-        var llaves = {{llaves}};
         llenar_array(topicos,color,palabras_json)
         var palabras = new Array();
         palabras=texto.split(' ');
@@ -66,24 +65,24 @@
 
         cont = 0;
         if (total<11) {
-            createBlocks(canvas,llaves,tam,color,cantidad,50,minimo,topicos);
-            createBlocks(canvas,llaves,tam,color,cantidad,90,minimo,topicos);
+            createBlocks(canvas,total,tam,color,cantidad,50,minimo,topicos);
+            createBlocks(canvas,total,tam,color,cantidad,90,minimo,topicos);
         }
         else if (total>10 && total<51) {
-            createBlocks(canvas,llaves,tam,color,cantidad,50,minimo*2,topicos);
-            createBlocks(canvas,llaves,tam,color,cantidad,90,minimo*2,topicos);
+            createBlocks(canvas,total,tam,color,cantidad,50,minimo*2,topicos);
+            createBlocks(canvas,total,tam,color,cantidad,90,minimo*2,topicos);
         }
         else{
             cantidad = parseInt(color.length/3)+1;
             if (total>60) {
                 cantidad = parseInt(color.length/3)+2;
             }        
-            createBlocks(canvas,llaves,tam,color,cantidad,50,minimo*2,topicos);
-            createBlocks(canvas,llaves,tam,color,cantidad,90,minimo*2,topicos);
+            createBlocks(canvas,total,tam,color,cantidad,50,minimo*2,topicos);
+            createBlocks(canvas,total,tam,color,cantidad,90,minimo*2,topicos);
             if (total>60) {
                 cantidad-=2;
             }
-            createBlocks(canvas,llaves,tam,color,cantidad,130,minimo*2,topicos);
+            createBlocks(canvas,total,tam,color,cantidad,130,minimo*2,topicos);
         }
         
         
@@ -209,18 +208,20 @@
         //Funcion para crear la data de los tooltip
         function ArrayToString(data,indice) {
             var myString='';
+            var ordenados = Object.keys(data[indice].words).sort(function(a,b){return data[indice].words[b]-data[indice].words[a]});
             var i=0;
-            for (x in data[indice]['words']) {
+            for (x in ordenados) {
                     if (i>2) {
                         myString+="\n"
                     }
-                    myString+=x;
+                    myString+=ordenados[x];
                     myString+=",";
                     i++;
                 }
             myString = myString.substr(0,(myString.length-1));  
             return myString;
         }
+        
         //Se crea el arreglo con todas las palabras y su mayor probabilidad
         function arreglo_global(allTopics,color,palabras_json){
             for(element in palabras_json)

@@ -20,7 +20,6 @@ from django.core.urlresolvers import reverse
 from StringIO import StringIO
 import csv
 
-import requests
 from django_topic_explorer.settings import URL_COMUN
 from django.utils.safestring import mark_safe
 from django_topic_explorer.settings import FILES_PATH
@@ -39,8 +38,6 @@ doc_title_format = settings.DOC_TITTLE_FORMAT
 doc_url_format = settings.DOC_URL_FORMAT
 
 #global lda_m, lda_v
-Topic_Json = {}
-
 
 lda_c = Corpus.load(corpus_file)
 #lda_m = LCM.load(model_pattern.format(k))
@@ -130,29 +127,32 @@ def doc_topics(request,doc_id, N=40):
 
 def topics(request):
     try:
-        # populate entropy values
-        data = lda_v.topic_oscillations()
-
-        colors = [itertools.cycle(cs) for cs in zip(*colorlib.brew(3,n_cls=4))]
-        factor = len(data) / len(colors)
-
-        js = {}
-        for rank,topic_H in enumerate(data):
-            topic, H = topic_H
-            js[str(topic)] = {
-                "H" : H,
-                "color" : colors[min(rank / factor, len(colors)-1)].next()
-            }
-
-        # populate word values
-        data = lda_v.topics()
-        for i,topic in enumerate(data):
-            js[str(i)].update({'words' : dict([(w, p) for w,p in topic[:20]])})
-        global Topic_Json
-        Topic_Json = json.dumps(js)
+        js=populateJson()
         return HttpResponse(json.dumps(js))
     except:
         return dump_exception()
+    
+def populateJson():
+    # populate entropy values
+    data = lda_v.topic_oscillations()
+
+    colors = [itertools.cycle(cs) for cs in zip(*colorlib.brew(3,n_cls=4))]
+    factor = len(data) / len(colors)
+
+    js = {}
+    for rank,topic_H in enumerate(data):
+        topic, H = topic_H
+        js[str(topic)] = {
+            "H" : H,
+            "color" : colors[min(rank / factor, len(colors)-1)].next()
+        }
+
+    # populate word values
+    data = lda_v.topics()
+    for i,topic in enumerate(data):
+        js[str(i)].update({'words' : dict([(w.decode('unicode-escape'), p) for w,p in topic[:20]])})
+    return js
+
 
 def docs(request):
     try:
@@ -204,16 +204,12 @@ class IrTopic(TemplateView):
         propuesta = request.POST['nombre_propuesta']
         #url = reverse('verTopicos')
         #Obtnener json
-        global Topic_Json
+        Topic_Json = populateJson()
+        Topic_Json = json.dumps(Topic_Json)
         topicos = json.loads(Topic_Json)
         mi_color = []
         mi_color = self.obtenerValores(topicos)
         mi_color = json.dumps(mi_color)
-        #obtener las llaves  para iterar en el select del index.html
-        llaves=[]
-        for x in topicos:
-            llaves.append(int(x))
-        llaves.sort()
         topicos = json.dumps(topicos)
         #print topicos
         #carga el pre-procesado del archivo en una variable
@@ -228,7 +224,6 @@ class IrTopic(TemplateView):
         return render(request,self.template_name,
                       {'topicos':topicos,
                        'propuesta':propuesta,
-                       'llaves':llaves,
                        'color':mi_color,
                        'texto':texto})
     
