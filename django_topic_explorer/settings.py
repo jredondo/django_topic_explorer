@@ -101,11 +101,11 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 #url comun para el proyecto
-#URL_COMUN='http://localhost:8000/'
-URL_COMUN='http://192.168.12.126:8000/'
+URL_COMUN='http://localhost:8000/'
+#URL_COMUN='http://192.168.12.126:8000/'
 ## TOPIC EXPLORER SETTINGS
-#TOPIC_EXPLORER_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/'
-TOPIC_EXPLORER_PATH = '/home/cenditel/Interpretacion/'
+TOPIC_EXPLORER_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/'
+#TOPIC_EXPLORER_PATH = '/home/cenditel/Interpretacion/'
 FILES_PATH = TOPIC_EXPLORER_PATH +'demo-data/corpus_propuestas/noaccent'
 MODELS_PATH = TOPIC_EXPLORER_PATH + 'demo-data/corpus_propuestas/models/'
 CORPUS_FILE = MODELS_PATH + 'pp-nltk-en-freq5.npz'
