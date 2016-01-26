@@ -128,6 +128,7 @@ function visualize(k) {
 }
 
 $.getJSON('/topic_explorer/docs.json', function(data) {
+  console.log(data);
   $(".typeahead").typeahead({items: 12,
     source: function(query, process) {
       labels = [];
@@ -283,7 +284,7 @@ if (n) url += "?n=" + n;
 
 var tops;
 d3.json(url, function(error, data) {
-  console.log(data);
+  console.log("DATA",data);
   $('#status .bar').css('width', '50%').text('Loading topics...');
   if (error) {
     $('#status .progress').removeClass('active progress-striped');

@@ -2,16 +2,19 @@ from vsm.extensions.interop.ldac import import_corpus
 from vsm.extensions.corpusbuilders import dir_corpus
 from vsm.corpus import Corpus
 from vsm.model.ldacgsmulti import LdaCgsMulti
+from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
 
 from vsm.model.ldafunctions import *
 import math
 import numpy as np
 
-
-path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/output/'
-#corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm_tmp/corpus.dat'
-corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/ap.dat'
-vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/vocab.txt'
+path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test50/'
+corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/corpus.dat'
+vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/vocab.txt'
+corpus_dir = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/noaccent'
+#path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/output/'
+#corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/ap.dat'
+#vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/vocab.txt'
 
 def likelihood(path=path):
   with open(path + 'likelihood.dat') as f:
@@ -98,13 +101,36 @@ def log_prob(path=path):
   z,indices = word_assigments(path)
   return compute_log_prob(c, z, wt, td)
  
-if __name__=='__main__':
-
+def corpus_model(path=path):
   z,indices = word_assigments(path)
+  zeta = []
+  for item in z:
+    zeta.extend(item)
   b = beta(path)
   v = vocab()
   a = alpha_list(z,path)
-  c = import_corpus(corpus_file,vocab_file) 
-  m = LdaCgsMulti(corpus=c,K=20,V=v,alpha=a,beta=b)
+  c = import_corpus(corpusfilename=corpus_file, vocabfilename=vocab_file, path=corpus_dir ,context_type='propesta')
+  alpha = []
+
+  for i in range(len(b)):
+    alpha.append(a)
+  alpha = (np.array(alpha, dtype=np.float).reshape(len(alpha),len(alpha[0])))
+
+  b = (np.array(b, dtype=np.float).reshape(len(b[0]),len(b)))
+  m = LdaCgsMulti(corpus=c,
+                  context_type='propesta',
+                  K=50,
+                  V=v,
+                  #alpha=alpha,
+                  #beta=b,
+                  Z=np.array(zeta))
 
 
+  return c,m 
+
+if __name__=='__main__':
+  print "******************** MAIN **********************"
+  save_path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/lda2vsm_models/'
+  c,m = corpus_model()
+  #c.save(save_path+'corpus.npz')
+  #save_lda(m,save_path+'model.npz')

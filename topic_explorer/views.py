@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from django.shortcuts import render
 
 from django.conf import settings
@@ -7,6 +9,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerEr
 import json
 
 from utils import colorlib
+from ldac2vsm import *
 import itertools
 from vsm.corpus import Corpus
 from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
@@ -26,10 +29,11 @@ from django_topic_explorer.settings import FILES_PATH
 
 #path = settings.PATH 
 corpus_file = settings.CORPUS_FILE
-context_type = settings.CONTEXT_TYPE
-model_pattern = settings.MODEL_PATTERN
+#context_type = settings.CONTEXT_TYPE
+context_type = 'propesta'
+#model_pattern = settings.MODEL_PATTERN
 topics = settings.TOPICS
-corpus_name = settings.CORPUS_NAME
+#corpus_name = settings.CORPUS_NAME
 icons = settings.ICONS
 
 corpus_link = settings.CORPUS_LINK
@@ -39,9 +43,13 @@ doc_url_format = settings.DOC_URL_FORMAT
 
 #global lda_m, lda_v
 
-lda_c = Corpus.load(corpus_file)
+# Integración LDA-c topic_explorer
+lda_c,lda_m = corpus_model()
+#lda_c = Corpus.load(corpus_file)
+#lda_c.save('/home/jredondo/tmp/corpus.npz')
+lda_v = LDAViewer(lda_c, lda_m)
+
 #lda_m = LCM.load(model_pattern.format(k))
-#lda_v = LDAViewer(lda_c, lda_m)
 label = lambda x: x
 
 def dump_exception():
@@ -65,8 +73,8 @@ def doc_topic_csv(request, doc_id):
     return HttpResponse(output.getvalue())
 
 def doc_csv(request, k_param,doc_id,threshold=0.2):
-    lda_m = LCM.load(model_pattern.format(k_param))
-    lda_v = LDAViewer(lda_c, lda_m)
+    #lda_m = LCM.load(model_pattern.format(k_param))
+    #lda_v = LDAViewer(lda_c, lda_m)
     data = lda_v.sim_doc_doc(doc_id)
 
     output=StringIO()
@@ -78,8 +86,8 @@ def doc_csv(request, k_param,doc_id,threshold=0.2):
 
 def topic_json(request,k_param,topic_no, N=40):
     #global lda_v
-    lda_m = LCM.load(model_pattern.format(k_param))
-    lda_v = LDAViewer(lda_c, lda_m)
+    #lda_m = LCM.load(model_pattern.format(k_param))
+    #lda_v = LDAViewer(lda_c, lda_m)
     try:
         N = int(request.query.n)
     except:
@@ -170,12 +178,12 @@ def docs(request):
 
 def index(request):
     global lda_m,lda_v
-    lda_m = LCM.load(model_pattern.format(10))
-    lda_v = LDAViewer(lda_c, lda_m)
+    #lda_m = LCM.load(model_pattern.format(10))
+    #lda_v = LDAViewer(lda_c, lda_m)
     template_name = 'topic_explorer/index.html'
     return render(request,template_name,
         {'filename':None,
-         'corpus_name' : corpus_name,
+         #'corpus_name' : corpus_name,
          'corpus_link' : corpus_link,
          'context_type' : context_type,
          'topics_range' : topics_range,
@@ -184,14 +192,14 @@ def index(request):
 
 def visualize(request,k_param,filename=None,topic_no=None):
     global lda_m,lda_v
-    lda_m = LCM.load(model_pattern.format(k_param))
-    lda_v = LDAViewer(lda_c, lda_m)
+    #lda_m = LCM.load(model_pattern.format(k_param))
+    #lda_v = LDAViewer(lda_c, lda_m)
     template_name = 'topic_explorer/index.html'
     return render(request,template_name,
         {'filename':filename,
          'k_param':k_param,
          'topic_no':topic_no,
-         'corpus_name' : corpus_name,
+         #'corpus_name' : corpus_name,
          'corpus_link' : corpus_link,
          'context_type' : context_type,
          'topics_range' : topics_range,
@@ -220,7 +228,8 @@ class IrTopic(TemplateView):
             texto=archivo.read()
             archivo.close()
         except:
-            text='No se encontro el documento'
+            return dump_exception()
+            texto='No se encontro el documento'
         return render(request,self.template_name,
                       {'topicos':topicos,
                        'propuesta':propuesta,
