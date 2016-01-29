@@ -8,20 +8,21 @@ from vsm.model.ldafunctions import *
 import math
 import numpy as np
 
-path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test50/'
-corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/corpus.dat'
-vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/vocab.txt'
-corpus_dir = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/noaccent'
+#path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test50/'
+#path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test15/'
+#corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/corpus.dat'
+#vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/vocab.txt'
+#corpus_dir = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/pp'
 #path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/output/'
 #corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/ap.dat'
 #vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/vocab.txt'
 
-def likelihood(path=path):
+def likelihood(path):
   with open(path + 'likelihood.dat') as f:
     lh = f.readlines()
   return np.array([item.strip('\n').split('\t')[0] for item in lh],dtype=np.float)
 
-def beta(path=path):
+def beta(path):
   b = []
   with open(path + 'final.beta') as f:
     for line in f:
@@ -30,12 +31,12 @@ def beta(path=path):
   return b
 
 
-def alpha(path=path):
+def alpha(path):
   with open(path + 'final.other') as f:
     a = f.readlines()
   return float(a[2].split()[1])
 
-def word_assigments(path=path):
+def word_assigments(path):
   indices_tmp = []
   z_tmp = []
   with open(path + 'word-assignments.dat') as f:
@@ -53,7 +54,7 @@ def word_assigments(path=path):
   
   return z,indices
 
-def corpus(file=corpus_file):
+def corpus(file):
   with open(file) as f:
     c = f.readlines()
   indices_tmp = [int(item.strip('\n').split()[0]) for item in c]
@@ -68,12 +69,12 @@ def corpus(file=corpus_file):
 
   return c,indices
 
-def vocab(file=vocab_file):
+def vocab(file):
   with open(file) as f:
     v = f.readlines()
   return len(v)
 
-def alpha_list(z,path=path):
+def alpha_list(z,path):
   a = alpha(path)
   a_list = []
   for i in range(len(z)):
@@ -81,33 +82,33 @@ def alpha_list(z,path=path):
   return a_list 
 
 
-def top_doc(path=path):
+def top_doc(path):
   z,indices = word_assigments(path)
   b = beta(path)
   a_list = alpha_list(z,path)
   return compute_top_doc(z, len(b), np.array(a_list))
    
-def word_top(path=path):
+def word_top(path):
   c,indices = corpus()
   z,indices = word_assigments(path)
   b = beta(path)
   v = vocab()
   return compute_word_top(c, z, len(b), v, np.transpose(b))
  
-def log_prob(path=path): 
+def log_prob(path): 
   wt =  word_top(path)
   td = top_doc(path)
   c,indices = corpus()
   z,indices = word_assigments(path)
   return compute_log_prob(c, z, wt, td)
  
-def corpus_model(path=path):
+def corpus_model(k_param,path,corpus_file,vocab_file,corpus_dir):
   z,indices = word_assigments(path)
   zeta = []
   for item in z:
     zeta.extend(item)
   b = beta(path)
-  v = vocab()
+  v = vocab(vocab_file)
   a = alpha_list(z,path)
   c = import_corpus(corpusfilename=corpus_file, vocabfilename=vocab_file, path=corpus_dir ,context_type='propesta')
   alpha = []
@@ -119,7 +120,8 @@ def corpus_model(path=path):
   b = (np.array(b, dtype=np.float).reshape(len(b[0]),len(b)))
   m = LdaCgsMulti(corpus=c,
                   context_type='propesta',
-                  K=50,
+                  #K=50,
+                  K=int(k_param),
                   V=v,
                   #alpha=alpha,
                   #beta=b,

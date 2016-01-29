@@ -9,7 +9,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerEr
 import json
 
 from utils import colorlib
-from ldac2vsm import *
+from utils.ldac2vsm import *
 import itertools
 from vsm.corpus import Corpus
 from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
@@ -27,6 +27,12 @@ from django_topic_explorer.settings import URL_COMUN
 from django.utils.safestring import mark_safe
 from django_topic_explorer.settings import FILES_PATH
 
+from django_topic_explorer.settings import LDA_DATA_PATH 
+from django_topic_explorer.settings import LDA_CORPUS_FILE 
+from django_topic_explorer.settings import LDA_VOCAB_FILE 
+from django_topic_explorer.settings import LDA_CORPUS_DIR 
+
+
 #path = settings.PATH 
 corpus_file = settings.CORPUS_FILE
 #context_type = settings.CONTEXT_TYPE
@@ -41,10 +47,15 @@ topics_range = [int(item) for item in settings.TOPICS.split(',')]
 doc_title_format = settings.DOC_TITTLE_FORMAT
 doc_url_format = settings.DOC_URL_FORMAT
 
-#global lda_m, lda_v
+global k_param
+k_param = None
+global lda_c,lda_m, lda_v
 
 # Integración LDA-c topic_explorer
-lda_c,lda_m = corpus_model()
+lda_c,lda_m = corpus_model(50,LDA_DATA_PATH.format(50),
+                           LDA_CORPUS_FILE,
+                           LDA_VOCAB_FILE,
+                           LDA_CORPUS_DIR)
 #lda_c = Corpus.load(corpus_file)
 #lda_c.save('/home/jredondo/tmp/corpus.npz')
 lda_v = LDAViewer(lda_c, lda_m)
@@ -63,53 +74,85 @@ def dump_exception():
 
 
 def doc_topic_csv(request, doc_id):
-    data = lda_v.doc_topics(doc_id)
-
-    output=StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['topic','prob'])
-    writer.writerows([(t, "%6f" % p) for t,p in data])
-
-    return HttpResponse(output.getvalue())
-
-def doc_csv(request, k_param,doc_id,threshold=0.2):
-    #lda_m = LCM.load(model_pattern.format(k_param))
-    #lda_v = LDAViewer(lda_c, lda_m)
-    data = lda_v.sim_doc_doc(doc_id)
-
-    output=StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['doc','prob'])
-    writer.writerows([(d, "%6f" % p) for d,p in data if p > threshold])
-
-    return HttpResponse(output.getvalue())
-
-def topic_json(request,k_param,topic_no, N=40):
-    #global lda_v
-    #lda_m = LCM.load(model_pattern.format(k_param))
-    #lda_v = LDAViewer(lda_c, lda_m)
+    global lda_v
     try:
-        N = int(request.query.n)
+        data = lda_v.doc_topics(doc_id)
+
+        output=StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['topic','prob'])
+        writer.writerows([(t, "%6f" % p) for t,p in data])
+
+        return HttpResponse(output.getvalue())
     except:
-        pass
+        return dump_exception()
 
-    if N > 0:
-        data = lda_v.dist_top_doc([int(topic_no)])[:N]
-    else:
-        data = lda_v.dist_top_doc([int(topic_no)])[N:]
-        data = reversed(data)
+def doc_csv(request, k,doc_id,threshold=0.2):
+    global k_param, lda_c, lda_m, lda_v
+    try:
+        if k != k_param:
+            k_param = k
+            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+                               LDA_CORPUS_FILE,
+                               LDA_VOCAB_FILE,
+                               LDA_CORPUS_DIR)
+            lda_v = LDAViewer(lda_c, lda_m)
+        #lda_m = LCM.load(model_pattern.format(k_param))
+        #lda_v = LDAViewer(lda_c, lda_m)
+        data = lda_v.sim_doc_doc(doc_id)
 
-    docs = [doc for doc,prob in data]
-    doc_topics_mat = lda_v.doc_topics(docs)
+        output=StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['doc','prob'])
+        writer.writerows([(d, "%6f" % p) for d,p in data if p > threshold])
 
-    js = []
-    for doc_prob, topics in zip(data, doc_topics_mat):
-        doc, prob = doc_prob
-        js.append({'doc' : doc, 'label': label(doc), 'prob' : 1-prob,
-            'topics' : dict([(str(t), p) for t,p in topics])})
-    return HttpResponse(json.dumps(js))
+        return HttpResponse(output.getvalue())
+    except:
+        return dump_exception()
 
-def doc_topics(request,doc_id, N=40):
+def topic_json(request,k,topic_no, N=40):
+    global k_param, lda_c, lda_m, lda_v
+    try:
+        if k != k_param:
+            k_param = k
+            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+                               LDA_CORPUS_FILE,
+                               LDA_VOCAB_FILE,
+                               LDA_CORPUS_DIR)
+            lda_v = LDAViewer(lda_c, lda_m)
+        #global lda_v
+        #lda_m = LCM.load(model_pattern.format(k_param))
+        #lda_v = LDAViewer(lda_c, lda_m)
+        try:
+            N = int(request.query.n)
+        except:
+            pass
+
+        if N > 0:
+            data = lda_v.dist_top_doc([int(topic_no)])[:N]
+        else:
+            data = lda_v.dist_top_doc([int(topic_no)])[N:]
+            data = reversed(data)
+
+        docs = [doc for doc,prob in data]
+        doc_topics_mat = lda_v.doc_topics(docs)
+
+        js = []
+        for doc_prob, topics in zip(data, doc_topics_mat):
+            doc, prob = doc_prob
+            js.append({'doc' : doc, 'label': label(doc), 'prob' : 1-prob,
+                'topics' : dict([(str(t), p) for t,p in topics])})
+        return HttpResponse(json.dumps(js))
+    except:
+        return dump_exception()
+
+def doc_topics(request,doc_id, N=40): 
+    global lda_v
+    #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+    #                           LDA_CORPUS_FILE,
+    #                           LDA_VOCAB_FILE,
+    #                           LDA_CORPUS_DIR)
+    #lda_v = LDAViewer(lda_c, lda_m)
     try:
         try:
             N = int(request.query.n)
@@ -134,13 +177,19 @@ def doc_topics(request,doc_id, N=40):
         return dump_exception()
 
 def topics(request):
+    global lda_v
     try:
-        js=populateJson()
+        #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+        #                       LDA_CORPUS_FILE,
+        #                       LDA_VOCAB_FILE,
+        #                       LDA_CORPUS_DIR)
+        #lda_v = LDAViewer(lda_c, lda_m)
+        js=populateJson(lda_v)
         return HttpResponse(json.dumps(js))
     except:
         return dump_exception()
     
-def populateJson():
+def populateJson(lda_v):
     # populate entropy values
     data = lda_v.topic_oscillations()
 
@@ -163,7 +212,13 @@ def populateJson():
 
 
 def docs(request):
+    global lda_v
     try:
+        #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+        #                       LDA_CORPUS_FILE,
+        #                       LDA_VOCAB_FILE,
+        #                       LDA_CORPUS_DIR)
+        #lda_v = LDAViewer(lda_c, lda_m)
         docs = lda_v.corpus.view_metadata(context_type)[doc_label_name(context_type)]
         js = list()
         for doc in docs:
@@ -177,42 +232,62 @@ def docs(request):
         return dump_exception()
 
 def index(request):
-    global lda_m,lda_v
-    #lda_m = LCM.load(model_pattern.format(10))
-    #lda_v = LDAViewer(lda_c, lda_m)
-    template_name = 'topic_explorer/index.html'
-    return render(request,template_name,
-        {'filename':None,
-         #'corpus_name' : corpus_name,
-         'corpus_link' : corpus_link,
-         'context_type' : context_type,
-         'topics_range' : topics_range,
-         'doc_title_format' : doc_title_format,
-         'doc_url_format' : doc_url_format})
+    try:
+        #global lda_m,lda_v
+        #lda_m = LCM.load(model_pattern.format(10))
+        #lda_v = LDAViewer(lda_c, lda_m)
+        template_name = 'topic_explorer/index.html'
+        return render(request,template_name,
+            {'filename':None,
+             #'corpus_name' : corpus_name,
+             'corpus_link' : corpus_link,
+             'context_type' : context_type,
+             'topics_range' : topics_range,
+             'doc_title_format' : doc_title_format,
+             'doc_url_format' : doc_url_format})
+    except:
+        return dump_exception()
 
-def visualize(request,k_param,filename=None,topic_no=None):
-    global lda_m,lda_v
-    #lda_m = LCM.load(model_pattern.format(k_param))
-    #lda_v = LDAViewer(lda_c, lda_m)
-    template_name = 'topic_explorer/index.html'
-    return render(request,template_name,
-        {'filename':filename,
-         'k_param':k_param,
-         'topic_no':topic_no,
-         #'corpus_name' : corpus_name,
-         'corpus_link' : corpus_link,
-         'context_type' : context_type,
-         'topics_range' : topics_range,
-         'doc_title_format' : doc_title_format,
-         'doc_url_format' : doc_url_format})
+def visualize(request,k,filename=None,topic_no=None):
+    global k_param,lda_c,lda_m,lda_v
+    try:
+        if k != k_param:
+            k_param = k
+            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+                               LDA_CORPUS_FILE,
+                               LDA_VOCAB_FILE,
+                               LDA_CORPUS_DIR)
+            lda_v = LDAViewer(lda_c, lda_m)
+        #lda_m = LCM.load(model_pattern.format(k_param))
+        #lda_v = LDAViewer(lda_c, lda_m)
+        template_name = 'topic_explorer/index.html'
+        return render(request,template_name,
+            {'filename':filename,
+             'k_param':k_param,
+             'topic_no':topic_no,
+             #'corpus_name' : corpus_name,
+             'corpus_link' : corpus_link,
+             'context_type' : context_type,
+             'topics_range' : topics_range,
+             'doc_title_format' : doc_title_format,
+             'doc_url_format' : doc_url_format})
+    except:
+        return dump_exception()
 
 class IrTopic(TemplateView):
     template_name='topic_explorer/verTopico.html'
     def post(self, request, *args, **kwargs):
+        global lda_v
+        #global k_param
+        #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+        #                       LDA_CORPUS_FILE,
+        #                       LDA_VOCAB_FILE,
+        #                       LDA_CORPUS_DIR)
+        #lda_v = LDAViewer(lda_c, lda_m)
         propuesta = request.POST['nombre_propuesta']
         #url = reverse('verTopicos')
         #Obtnener json
-        Topic_Json = populateJson()
+        Topic_Json = populateJson(lda_v)
         Topic_Json = json.dumps(Topic_Json)
         topicos = json.loads(Topic_Json)
         mi_color = []
