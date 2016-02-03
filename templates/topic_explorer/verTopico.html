@@ -13,6 +13,7 @@
             text-align: center;
             
           }
+
     </style>
 {% endblock %}
 {% block body %}
@@ -26,6 +27,7 @@
         <div id="contenedor" style="float:left;width:15%">
             <div class="btn-group" align="center" style="width: 80%">
                 <button class="btn" id="verTodos">Ver Todos</button>
+                <button class="btn" id="Limpiar">Limpiar</button>
             </div>
             <div id="topic">
             </div>
@@ -36,6 +38,11 @@
         var mi_color={{color|safe}};
         var texto = "{{texto}}";
         var topicos = {{topicos|safe}};
+        var documentos = {{documento|safe}};
+        var topic_document = documentos.topics;
+        indices = Object.keys(topic_document).sort(function(a,b){return topic_document[b]-topic_document[a];});
+        var seleccionados = new Array();
+        var mi_seleccion = new Array();
         var color = new Array();
         var palabras_json = new Array();
         llenar_array(topicos,color,palabras_json)
@@ -46,8 +53,13 @@
             d3.select('#texto')
                 .append('p').text(texto);
             arreglo_global(allTopics,color,palabras_json);
-         });  
+         });
+        var topic = {};
         
+        for(element in topicos)
+        {
+            topic[element] = topicos[element];
+        }
         var cantidad = parseInt(color.length/2)+1;
         var total = parseInt(color.length);
         
@@ -79,8 +91,14 @@
             }        
             createBlocks(canvas,total,tam,color,cantidad,50,minimo*2,topicos);
             createBlocks(canvas,total,tam,color,cantidad,90,minimo*2,topicos);
-            if (total>60) {
+            if (total>60 && total<=70) {
                 cantidad-=2;
+            }
+            else if (total>70 && total<=80) {
+                cantidad-=1;
+            }
+            else if (total>80) {
+                cantidad -=3;
             }
             createBlocks(canvas,total,tam,color,cantidad,130,minimo*2,topicos);
         }
@@ -101,7 +119,23 @@
             $(this).find('rect').css('stroke','none');
             });
         $('.group').click(function(){
-            var palabra = new Array();
+            var attribute = $(this).attr('id')
+            if (seleccionados.indexOf(attribute)!=-1) {
+                $(this).find('text').css('stroke','none');
+                seleccionados.splice(seleccionados.indexOf(attribute), 1);
+            }
+            else{
+                seleccionados.push(attribute);
+                $(this).find('text').css('stroke','black');
+            }
+            d3.select('#texto')
+                .selectAll('p').remove();
+            d3.select('#texto')
+                .selectAll('span').remove();
+            crear_seleccion(mi_seleccion,seleccionados,color,topicos);
+            create_all_text(palabras,mi_seleccion);
+            mi_seleccion = [];
+            /*var palabra = new Array();
             var probabilidad = new Array();
             var id = $(this).attr('id');
             getWordProb(palabras_json[id],palabra,probabilidad);
@@ -109,7 +143,7 @@
                 .selectAll('p').remove();
             d3.select('#texto')
                 .selectAll('span').remove();
-            crear_texto(palabras,palabra,probabilidad,color[id]);            
+            crear_texto(palabras,palabra,probabilidad,color[id]);*/            
             });
         $('#verTodos').click(function(){
             d3.select('#texto')
@@ -119,9 +153,27 @@
             create_all_text(palabras,allTopics); 
             });
         
+        $('#Limpiar').click(function(){
+            d3.select('#texto')
+                .selectAll('p').remove();
+            d3.select('#texto')
+                .selectAll('span').remove();
+            d3.select('#texto')
+                .append('p').text(texto);
+            $('.group').each(function(){
+                $(this).find('text').css('stroke','none');
+                });
+            seleccionados = [];
+            });
+        
         $('.myRect').tooltip({
                 'container': 'body',
                 'placement': 'right'
+        });
+        
+        $('#seleccionado').click(function(){
+            $(this).find('text').css('font-weight','bold');
+            $(this).find('rect').css({'stroke':'black','stroke-width':'2px'});
         });
         
         //Funcion para obtener las palabras y probabilidades de un item clickeado
@@ -181,9 +233,9 @@
             {
                 var group = canvas.append('g')
                     .attr('class','group')
-                    .attr('id',cont)
+                    .attr('id',indices[cont])
                 
-                myStr = ArrayToString(topicos,cont);
+                myStr = ArrayToString(topicos,indices[cont]);
                                 
                 var rect = canvas.selectAll('rect')
                     .data(datas)
@@ -194,10 +246,10 @@
                             .attr('title',myStr)
                             .attr('y',j*(tam+2))
                             .attr('x',function(d,i){return (i+1)*movX;})
-                            .attr('fill',color[cont])
+                            .attr('fill',color[indices[cont]])
                             .attr('class','myRect')
                         group.append('text')
-                            .text(cont)
+                            .text(indices[cont])
                             .attr('y',j*(tam+2))
                             .attr('x',movX-minimo)
                             .attr('dy','13');
@@ -293,6 +345,32 @@
                         .append("span").text(palabras[element]+" ")
                 }
             }
+        }
+        
+
+        function crear_seleccion(mi_seleccion,seleccionados,color,topicos){
+            for(element in seleccionados)
+            {
+                for(palabra in topicos[seleccionados[element]]['words'])
+                {
+                    var bool=comprobar(mi_seleccion,palabra);
+                    var prob=topicos[seleccionados[element]]['words'][palabra];
+                    if (bool[0]) {
+                        var pos=bool[1];
+                        if (mi_seleccion[pos][1]<prob)
+                        {
+                            mi_seleccion[pos][1]=prob;
+                            mi_seleccion[pos][2]=color[seleccionados[element]];
+                        }
+                    }
+                    else
+                    {
+                        var valor = new Array();
+                        valor.push(palabra,prob,color[seleccionados[element]]);
+                        mi_seleccion.push(valor);
+                    }
+                }
+            }   
         }
         
     </script>

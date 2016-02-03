@@ -8,7 +8,7 @@ from vsm.model.ldafunctions import *
 import math
 import numpy as np
 
-#path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test50/'
+#path = '/home/rodrigo/Proyectos/Interpretacion/demo-data/data_ldac/test50'
 #path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test15/'
 #corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/corpus.dat'
 #vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/vocab.txt'
@@ -132,7 +132,8 @@ def corpus_model(k_param,path,corpus_file,vocab_file,corpus_dir):
 
 if __name__=='__main__':
   print "******************** MAIN **********************"
-  save_path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/lda2vsm_models/'
+  #save_path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/lda2vsm_models/'
+  save_path = '/home/rodrigo/Proyectos/Interpretacion/demo-data/data_ldac/'
   c,m = corpus_model()
   #c.save(save_path+'corpus.npz')
   #save_lda(m,save_path+'model.npz')

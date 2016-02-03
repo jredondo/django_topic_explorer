@@ -10,6 +10,7 @@ import json
 
 from utils import colorlib
 from utils.ldac2vsm import *
+from utils.json_data import *
 import itertools
 from vsm.corpus import Corpus
 from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
@@ -146,36 +147,25 @@ def topic_json(request,k,topic_no, N=40):
     except:
         return dump_exception()
 
-def doc_topics(request,doc_id, N=40): 
+def doc_topics(request,doc_id, N=40):
     global lda_v
-    #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-    #                           LDA_CORPUS_FILE,
-    #                           LDA_VOCAB_FILE,
-    #                           LDA_CORPUS_DIR)
-    #lda_v = LDAViewer(lda_c, lda_m)
     try:
+        if lda_v == None:
+            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+                               LDA_CORPUS_FILE,
+                               LDA_VOCAB_FILE,
+                               LDA_CORPUS_DIR)
+            lda_v = LDAViewer(lda_c, lda_m)
         try:
             N = int(request.query.n)
         except:
             pass
-        if N > 0:
-            data = lda_v.dist_doc_doc(doc_id)[:N]
-        else:
-            data = lda_v.dist_doc_doc(doc_id)[N:]
-            data = reversed(data)
-
-        docs = [doc for doc,prob in data]
-        doc_topics_mat = lda_v.doc_topics(docs)
-
-        js = []
-        for doc_prob, topics in zip(data, doc_topics_mat):
-            doc, prob = doc_prob
-            js.append({'doc' : doc, 'label': label(doc), 'prob' : 1-prob,
-                'topics' : dict([(str(t), p) for t,p in topics])})
+        js = doc_json(lda_v,doc_id,N)
         return HttpResponse(json.dumps(js))
     except:
         return dump_exception()
-
+    
+    
 def topics(request):
     global lda_v
     try:
@@ -189,27 +179,6 @@ def topics(request):
     except:
         return dump_exception()
     
-def populateJson(lda_v):
-    # populate entropy values
-    data = lda_v.topic_oscillations()
-
-    colors = [itertools.cycle(cs) for cs in zip(*colorlib.brew(3,n_cls=4))]
-    factor = len(data) / len(colors)
-
-    js = {}
-    for rank,topic_H in enumerate(data):
-        topic, H = topic_H
-        js[str(topic)] = {
-            "H" : H,
-            "color" : colors[min(rank / factor, len(colors)-1)].next()
-        }
-
-    # populate word values
-    data = lda_v.topics()
-    for i,topic in enumerate(data):
-        js[str(i)].update({'words' : dict([(w.decode('unicode-escape'), p) for w,p in topic[:20]])})
-    return js
-
 
 def docs(request):
     global lda_v
@@ -226,10 +195,10 @@ def docs(request):
                 'id': doc,
                 'label' : label(doc)
             })
-
         return HttpResponse(json.dumps(js))
     except:
         return dump_exception()
+      
 
 def index(request):
     try:
@@ -276,7 +245,7 @@ def visualize(request,k,filename=None,topic_no=None):
 
 class IrTopic(TemplateView):
     template_name='topic_explorer/verTopico.html'
-    def post(self, request, *args, **kwargs):
+    def get(self, request, propuesta = None):
         global lda_v
         #global k_param
         #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
@@ -284,12 +253,15 @@ class IrTopic(TemplateView):
         #                       LDA_VOCAB_FILE,
         #                       LDA_CORPUS_DIR)
         #lda_v = LDAViewer(lda_c, lda_m)
-        propuesta = request.POST['nombre_propuesta']
-        #url = reverse('verTopicos')
         #Obtnener json
         Topic_Json = populateJson(lda_v)
         Topic_Json = json.dumps(Topic_Json)
         topicos = json.loads(Topic_Json)
+        N = len(topicos)
+        Docs = doc_json(lda_v,propuesta,N)
+        Docs = json.dumps(Docs)
+        documentos = self.obtenerDocumento(json.loads(Docs),propuesta)
+        documentos = json.dumps(documentos)
         mi_color = []
         mi_color = self.obtenerValores(topicos)
         mi_color = json.dumps(mi_color)
@@ -309,10 +281,17 @@ class IrTopic(TemplateView):
                       {'topicos':topicos,
                        'propuesta':propuesta,
                        'color':mi_color,
-                       'texto':texto})
+                       'texto':texto,
+                       'documento':documentos})
     
     def obtenerValores(self,topicos):#funcion para obtener los colores del json
         my_topic=[]
         for x in topicos:
             my_topic.append(topicos[x]['color'])
         return my_topic
+    
+    def obtenerDocumento(self,docs,propuesta):
+        #document = {}
+        for x in docs:
+            if(x['doc']==propuesta):
+                return x

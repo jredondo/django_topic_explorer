@@ -101,20 +101,23 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 #url comun para el proyecto
-URL_COMUN='http://localhost:8000/'
-#URL_COMUN='http://192.168.12.126:8000/'
+#URL_COMUN='http://localhost:8000/'
+URL_COMUN='http://192.168.12.178:8000/'
 ## TOPIC EXPLORER SETTINGS
-#TOPIC_EXPLORER_PATH = '/home/cenditel/Interpretacion/'
-TOPIC_EXPLORER_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/'
+TOPIC_EXPLORER_PATH = '/home/rodrigo/Proyectos/Interpretacion/'
+#TOPIC_EXPLORER_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/'
 FILES_PATH = TOPIC_EXPLORER_PATH +'demo-data/corpus_propuestas/noaccent'
 MODELS_PATH = TOPIC_EXPLORER_PATH + 'demo-data/corpus_propuestas/models/'
 #FILES_PATH = TOPIC_EXPLORER_PATH +'demo-data/ap/'
 #MODELS_PATH = TOPIC_EXPLORER_PATH + 'demo-data/corpus_propuestas/lda2vsm_models/'
 CORPUS_FILE = MODELS_PATH + 'pp-nltk-en-freq5.npz'
-LDA_DATA_PATH = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test{0}/'
-LDA_CORPUS_FILE = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/corpus.dat'
-LDA_VOCAB_FILE = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/vocab.txt'
-LDA_CORPUS_DIR = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/pp'
+LDA_DATA_PATH = TOPIC_EXPLORER_PATH + 'test_lda/test{0}/'
+#LDA_CORPUS_FILE = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/corpus.dat'
+#LDA_VOCAB_FILE = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/vocab.txt'
+#LDA_CORPUS_DIR = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/pp'
+LDA_CORPUS_FILE = TOPIC_EXPLORER_PATH + 'test_lda/vsm2ldac/corpus.dat'
+LDA_VOCAB_FILE = TOPIC_EXPLORER_PATH + 'test_lda/vsm2ldac/vocab.txt'
+LDA_CORPUS_DIR = TOPIC_EXPLORER_PATH +'demo-data/corpus_propuestas/pp'
 
 #MODEL_PATTERN = MODELS_PATH + 'model.npz'
 

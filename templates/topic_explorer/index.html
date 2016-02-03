@@ -35,21 +35,13 @@
   </div>
   
   </form>
-  
-    <form action='{{BASE_URL}}/topic_explorer/see_topic/' method="post" class="form-inline" target="_blank">
-      {% csrf_token %}
-      <div class="btn-group" id="aPropuesta">
-        <button type="submit" id="ir-aPropuesta" class="btn">Ir aPropuesta</button>
-      </div>
-      <input type="text" name="nombre_propuesta" id="name_propuesta">
-    </form>
-  
+    
 
 
   <script>
 
   $(document).ready(function () {
-    $('#name_propuesta').hide();
+    
     var visited = $.cookie('visited')
     if (visited != null) {
       $('.help').hide();
@@ -63,7 +55,6 @@
         expires: 1,
         path: '/'
     });
-    $('#aPropuesta').hide();
   });
   var scrollLegend;
   $('#helpBtn').click(function() {
@@ -284,6 +275,7 @@ if (n) url += "?n=" + n;
 
 var tops;
 d3.json(url, function(error, data) {
+  console.log(url);
   console.log("DATA",data);
   $('#status .bar').css('width', '50%').text('Loading topics...');
   if (error) {
@@ -503,11 +495,9 @@ d3.json(url, function(error, data) {
         .attr("x", function(d) { return x(d.x0); })
         .attr("width", function(d) { return x(d.x1) - x(d.x0); });
     }
-  
-  $('#aPropuesta').show();  //Se muestra el nuevo div
-  nombre_propuesta = $("#doc").val();  //Nombre de la propuesta que se esta buscando
-  //Al nuevo campo que se va a enviar se le asigna el nombre de la propuesta
-  $('#name_propuesta').val(nombre_propuesta);
+    
+    /*    Funcion para cargar los topicos al dar clic   */
+    cargar();
   
     d3.select(".sort").on("change", alphabetSort);
     
@@ -691,11 +681,17 @@ d3.json(url, function(error, data) {
 
   }
   
-  function aPropuesta(){
-    window.location.href="{{BASE_URL}}/see_topic";
-  }
-  
+    function cargar(){
+      $(document).ready(function(){
+          $(".doc").click(function(){
+          var propuesta = $(this).find("text").text();
+          var url = "{{BASE_URL}}/topic_explorer/see_topic/"+propuesta+"/";
+          window.open(url);
+        });
+      });
+    }
    
 </script>
+
 
 {%endblock%}
