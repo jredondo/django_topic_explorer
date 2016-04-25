@@ -15,7 +15,7 @@ import itertools
 from vsm.corpus import Corpus
 from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
 from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
-from vsm.viewer.wrappers import doc_label_name
+from vsm.viewer.wrappers import doc_label_name, dist_word_doc
 from django.core import serializers
 
 from django.views.generic import TemplateView
@@ -53,13 +53,32 @@ k_param = None
 global lda_c,lda_m, lda_v
 
 # Integración LDA-c topic_explorer
-lda_c,lda_m = corpus_model(50,LDA_DATA_PATH.format(50),
+lda_c,lda_m = corpus_model(10,LDA_DATA_PATH.format(10),
                            LDA_CORPUS_FILE,
                            LDA_VOCAB_FILE,
                            LDA_CORPUS_DIR)
 #lda_c = Corpus.load(corpus_file)
 #lda_c.save('/home/jredondo/tmp/corpus.npz')
 lda_v = LDAViewer(lda_c, lda_m)
+#from vsm.spatial import JS_dist
+print "###### WORD TOP..."
+#tops = lda_v.dist_word_top(['agua','agricola'], weights=[], filter_nan=True,
+#                      show_topics=True, print_len=10, as_strings=True,
+#                      compact_view=True, dist_fn=JS_dist, order='i',
+#                      topic_labels=None)
+
+print "###### TOP DOC..."
+#print lda_v.dist_top_doc(tops[0].col_header.split()[1], weights=[], filter_words=[],
+#                     print_len=10, as_strings=True, #label_fn=def_label_fn,
+#                     filter_nan=True, dist_fn=JS_dist, order='i')
+
+#print "###### WORD DOC..."
+#mat = lda_v.model.top_doc / lda_v.model.top_doc.sum(0)
+#print dist_word_doc(['agua','agricola','productivo','ambiente'], lda_c, 
+#                  lda_v.model.context_type,np.transpose(mat))#, weights=[],
+#                  filter_nan=True, print_len=10,
+#                  label_fn=def_label_fn, as_strings=True,
+#                  dist_fn=angle, order='i')
 
 #lda_m = LCM.load(model_pattern.format(k))
 label = lambda x: x

@@ -21,7 +21,8 @@ def populateJson(lda_v):
     # populate word values
     data = lda_v.topics()
     for i,topic in enumerate(data):
-        js[str(i)].update({'words' : dict([(w.decode('unicode-escape'), p) for w,p in topic[:20]])})
+        #js[str(i)].update({'words' : dict([(w.decode('unicode-escape'), p) for w,p in topic[:20]])})
+        js[str(i)].update({'words' : dict([(w, p) for w,p in topic[:20]])})
     return js
 
 #def docs_data(lda_v,doc_id,N=40):

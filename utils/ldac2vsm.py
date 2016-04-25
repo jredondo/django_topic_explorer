@@ -8,6 +8,8 @@ from vsm.model.ldafunctions import *
 import math
 import numpy as np
 
+import codecs
+
 #path = '/home/rodrigo/Proyectos/Interpretacion/demo-data/data_ldac/test50'
 #path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/test15/'
 #corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/vsm2ldac/corpus.dat'
@@ -18,13 +20,13 @@ import numpy as np
 #vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/vocab.txt'
 
 def likelihood(path):
-  with open(path + 'likelihood.dat') as f:
+  with codecs.open(path + 'likelihood.dat','r','utf8') as f:
     lh = f.readlines()
   return np.array([item.strip('\n').split('\t')[0] for item in lh],dtype=np.float)
 
 def beta(path):
   b = []
-  with open(path + 'final.beta') as f:
+  with codecs.open(path + 'final.beta','r','utf8') as f:
     for line in f:
       b.append([math.exp(float(item)) for item in line.strip('\n').split()])
       #b.append([10**float(item) for item in line.strip('\n').split()])
@@ -32,14 +34,14 @@ def beta(path):
 
 
 def alpha(path):
-  with open(path + 'final.other') as f:
+  with codecs.open(path + 'final.other','r','utf8') as f:
     a = f.readlines()
   return float(a[2].split()[1])
 
 def word_assigments(path):
   indices_tmp = []
   z_tmp = []
-  with open(path + 'word-assignments.dat') as f:
+  with codecs.open(path + 'word-assignments.dat','r','utf8') as f:
     for line in f:
       indices_tmp += [int(line.strip('\n').split()[0])]
       line_split = line.strip('\n').split()
@@ -55,7 +57,7 @@ def word_assigments(path):
   return z,indices
 
 def corpus(file):
-  with open(file) as f:
+  with codecs.open(file,'r','utf8') as f:
     c = f.readlines()
   indices_tmp = [int(item.strip('\n').split()[0]) for item in c]
   indices = []
@@ -70,7 +72,7 @@ def corpus(file):
   return c,indices
 
 def vocab(file):
-  with open(file) as f:
+  with codecs.open(file,'r','utf8') as f:
     v = f.readlines()
   return len(v)
 
