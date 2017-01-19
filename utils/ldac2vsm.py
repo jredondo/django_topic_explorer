@@ -110,7 +110,7 @@ def corpus_model(k_param,path,corpus_file,vocab_file,corpus_dir):
   b = beta(path)
   v = vocab(vocab_file)
   a = alpha_list(z,path)
-  c = import_corpus(corpusfilename=corpus_file, vocabfilename=vocab_file, path=corpus_dir ,context_type='propesta')
+  c = import_corpus(corpusfilename=corpus_file, vocabfilename=vocab_file, path=corpus_dir, context_type='propesta')
   alpha = []
 
   for i in range(len(b)):

@@ -119,7 +119,6 @@ function visualize(k) {
 }
 
 $.getJSON('/topic_explorer/docs.json', function(data) {
-  console.log(data);
   $(".typeahead").typeahead({items: 12,
     source: function(query, process) {
       labels = [];
