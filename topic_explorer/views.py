@@ -24,7 +24,6 @@ from django.core.urlresolvers import reverse
 from StringIO import StringIO
 import csv
 
-from django_topic_explorer.settings import URL_COMUN
 from django.utils.safestring import mark_safe
 from django_topic_explorer.settings import FILES_PATH
 

@@ -111,9 +111,8 @@ else
   $('.null').show();
 
 function visualize(k) {
-  var url = "{0}//{1}:8000/topic_explorer/doc/{2}/".format(window.location.protocol, window.location.hostname, k);
   
-  
+  var url = "{0}//{1}:{2}/topic_explorer/doc/{3}/".format(window.location.protocol, window.location.hostname, window.location.port, k);
   url += encodeURIComponent($("#hidden_id").val() || docid) ;
   window.location = url;
 }
@@ -274,8 +273,6 @@ if (n) url += "?n=" + n;
 
 var tops;
 d3.json(url, function(error, data) {
-  console.log(url);
-  console.log("DATA",data);
   $('#status .bar').css('width', '50%').text('Loading topics...');
   if (error) {
     $('#status .progress').removeClass('active progress-striped');
@@ -684,7 +681,7 @@ d3.json(url, function(error, data) {
       $(document).ready(function(){
           $(".doc").click(function(){
           var propuesta = $(this).find("text").text();
-          var url = "{{BASE_URL}}/topic_explorer/see_topic/"+propuesta+"/";
+          var url = "/topic_explorer/see_topic/"+propuesta+"/";
           window.open(url);
         });
       });
