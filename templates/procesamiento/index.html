@@ -1,0 +1,56 @@
+{%extends 'base.html'%}
+{% load staticfiles %}
+{% block title %}Procesamiento{% endblock %}
+{%block body%}
+    <div class="container">
+        <h1>Procesamiento</h1>
+        <hr>
+        <form action="{% url 'procesamiento_index' %}" role="form" class="form form-horizontal validate-form" method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="row">
+                <div class="form-group {% if form.procesamiento_dir.errors %}has-error{% endif %}">
+                    <div class="col-md-4">{{ form.procesamiento_dir.label }}</div>
+                    <div class="col-md-8"> {{ form.procesamiento_dir }}</div>
+                </div>
+                {% include 'form.errors.html' with form_errors=form.procesamiento_dir.errors col_title_error='col-sm-2' col_msg_error='col-sm-10' %}
+            </div><br>
+            
+            <div class="row">
+                <div class="form-group {% if form.corpus_dir.errors %}has-error{% endif %}">
+                    <div class="col-md-4">{{ form.corpus_dir.label }}</div>
+                    <div class="col-md-8"> {{ form.corpus_dir }}</div>
+                </div>
+                {% include 'form.errors.html' with form_errors=form.corpus_dir.errors col_title_error='col-sm-2' col_msg_error='col-sm-10' %}
+            </div><br>
+            
+            <div class="row">
+                <div class="form-group {% if form.words.errors %}has-error{% endif %}">
+                    <div class="col-md-4">{{ form.words.label }}</div>
+                    <div class="col-md-8"> {{ form.words }}</div>
+                </div>
+                {% include 'form.errors.html' with form_errors=form.words.errors col_title_error='col-sm-2' col_msg_error='col-sm-10' %}
+            </div><br>
+                    
+            <div class="row">
+                <div class="form-group {% if form.excluded_words.errors %}has-error{% endif %}">
+                    <div class="col-md-4">{{ form.excluded_words.label }}</div>
+                    <div class="col-md-8"> {{ form.excluded_words }}</div>
+                </div>
+                {% include 'form.errors.html' with form_errors=form.excluded_words.errors col_title_error='col-sm-2' col_msg_error='col-sm-10' %}
+            </div><br>
+            
+            <div>
+                <button type="submit" class="btn btn-primary btn-sm">Procesar</button>
+            </div>
+        </form>
+    </div>
+{%endblock%}
+
+{% block extraJs%}
+<script>
+$('.form').on('submit', function(event){
+    event.preventDefault();
+    createPreprocess(this);
+});
+</script>
+{% endblock %}

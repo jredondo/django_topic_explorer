@@ -1,22 +1,32 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
+"""
+Sistema de Modelado de Tópicos
+
+Copyleft (@) 2014 CENDITEL nodo Mérida - https://planificacion.cenditel.gob.ve/trac/
+"""
+## @package django_topic_explorer.topic_explorer
+#
+# Métodos de la Vista, para visualizar los tópicos
+# @author Jorge Redondo (jredondo at cenditel.gob.ve)
+# @author <a href='http://www.cenditel.gob.ve'>Centro Nacional de Desarrollo e Investigación en Tecnologías Libres
+# (CENDITEL) nodo Mérida - Venezuela</a>
+# @copyright <a href='http://www.gnu.org/licenses/gpl-2.0.html'>GNU Public License versión 2 (GPLv2)</a>
+# @version 1.3
 
 from django.shortcuts import render
 
 from django.conf import settings
 
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, StreamingHttpResponse
+from django.http import HttpResponse, HttpResponseServerError
 
 import json
 
-from utils import colorlib
 from utils.ldac2vsm import *
 from utils.json_data import *
-import itertools
-from vsm.corpus import Corpus
-from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
+#from vsm.corpus import Corpus
+#from vsm.model.ldacgsmulti import LdaCgsMulti as LCM
 from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
 from vsm.viewer.wrappers import doc_label_name
-from django.core import serializers
 
 from django.views.generic import TemplateView
 from django.core.urlresolvers import reverse
@@ -24,9 +34,7 @@ from django.core.urlresolvers import reverse
 from StringIO import StringIO
 import csv
 
-from django.utils.safestring import mark_safe
 from django_topic_explorer.settings import FILES_PATH
-
 from django_topic_explorer.settings import LDA_DATA_PATH 
 from django_topic_explorer.settings import LDA_CORPUS_FILE 
 from django_topic_explorer.settings import LDA_VOCAB_FILE 
@@ -34,13 +42,12 @@ from django_topic_explorer.settings import LDA_CORPUS_DIR
 
 
 #path = settings.PATH 
-corpus_file = settings.CORPUS_FILE
+#corpus_file = settings.CORPUS_FILE
 #context_type = settings.CONTEXT_TYPE
 context_type = 'propesta'
 #model_pattern = settings.MODEL_PATTERN
 topics = settings.TOPICS
 #corpus_name = settings.CORPUS_NAME
-icons = settings.ICONS
 
 corpus_link = settings.CORPUS_LINK
 topics_range = [int(item) for item in settings.TOPICS.split(',')]
@@ -64,6 +71,14 @@ lda_v = LDAViewer(lda_c, lda_m)
 label = lambda x: x
 
 def dump_exception():
+    """!
+    Función para captar los errores e imprimirlos
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @return Retorna una respuesta http con el error
+    """ 
     import sys,traceback
     exc_type, exc_value, exc_traceback = sys.exc_info()
     print "*** print_tb:"
@@ -74,6 +89,15 @@ def dump_exception():
 
 
 def doc_topic_csv(request, doc_id):
+    """!
+    Función para retornar un documento en csv
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @param doc_id <b>{string}</b> Recibe el número del documento
+    @return Retorna los datos del documento
+    """
     global lda_v
     try:
         data = lda_v.doc_topics(doc_id)
@@ -88,6 +112,17 @@ def doc_topic_csv(request, doc_id):
         return dump_exception()
 
 def doc_csv(request, k,doc_id,threshold=0.2):
+    """!
+    Función para retornar la data de los tópicos en csv
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @param k <b>{int}</b> Recibe el número de tópicos a mostrar
+    @param doc_id <b>{string}</b> Recibe el número de tópicos
+    @param threshold <b>{int}</b> Recibe el limite estadístico
+    @return Retorna el render de la vista
+    """
     global k_param, lda_c, lda_m, lda_v
     try:
         if k != k_param:
@@ -97,8 +132,6 @@ def doc_csv(request, k,doc_id,threshold=0.2):
                                LDA_VOCAB_FILE,
                                LDA_CORPUS_DIR)
             lda_v = LDAViewer(lda_c, lda_m)
-        #lda_m = LCM.load(model_pattern.format(k_param))
-        #lda_v = LDAViewer(lda_c, lda_m)
         data = lda_v.sim_doc_doc(doc_id)
 
         output=StringIO()
@@ -111,6 +144,17 @@ def doc_csv(request, k,doc_id,threshold=0.2):
         return dump_exception()
 
 def topic_json(request,k,topic_no, N=40):
+    """!
+    Función para retornar la data de los tópicos en json
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @param k <b>{int}</b> Recibe el número de tópicos a mostrar
+    @param topic_no <b>{string}</b> Recibe el número de tópicos
+    @param N <b>{int}</b> Recibe la cantidad
+    @return Retorna el render de la vista
+    """
     global k_param, lda_c, lda_m, lda_v
     try:
         if k != k_param:
@@ -120,9 +164,6 @@ def topic_json(request,k,topic_no, N=40):
                                LDA_VOCAB_FILE,
                                LDA_CORPUS_DIR)
             lda_v = LDAViewer(lda_c, lda_m)
-        #global lda_v
-        #lda_m = LCM.load(model_pattern.format(k_param))
-        #lda_v = LDAViewer(lda_c, lda_m)
         try:
             N = int(request.query.n)
         except:
@@ -147,6 +188,16 @@ def topic_json(request,k,topic_no, N=40):
         return dump_exception()
 
 def doc_topics(request,doc_id, N=40):
+    """!
+    Función para retornar la data de los documentos en json
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @param doc_id <b>{string}</b> Recibe el número del documento
+    @param N <b>{int}</b> Recibe la cantidad
+    @return Retorna el render de la vista
+    """
     global lda_v
     try:
         if lda_v == None:
@@ -166,13 +217,16 @@ def doc_topics(request,doc_id, N=40):
     
     
 def topics(request):
+    """!
+    Función para servir los tópicos como un json
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @return Retorna el objeto json
+    """ 
     global lda_v
     try:
-        #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-        #                       LDA_CORPUS_FILE,
-        #                       LDA_VOCAB_FILE,
-        #                       LDA_CORPUS_DIR)
-        #lda_v = LDAViewer(lda_c, lda_m)
         js=populateJson(lda_v)
         return HttpResponse(json.dumps(js))
     except:
@@ -180,13 +234,16 @@ def topics(request):
     
 
 def docs(request):
+    """!
+    Función para servir los documentos como un json
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @return Retorna el objeto json
+    """
     global lda_v
     try:
-        #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-        #                       LDA_CORPUS_FILE,
-        #                       LDA_VOCAB_FILE,
-        #                       LDA_CORPUS_DIR)
-        #lda_v = LDAViewer(lda_c, lda_m)
         docs = lda_v.corpus.view_metadata(context_type)[doc_label_name(context_type)]
         js = list()
         for doc in docs:
@@ -200,14 +257,18 @@ def docs(request):
       
 
 def index(request):
+    """!
+    Función para visualizar el index del proyecto
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @return Retorna el render de la vista
+    """
     try:
-        #global lda_m,lda_v
-        #lda_m = LCM.load(model_pattern.format(10))
-        #lda_v = LDAViewer(lda_c, lda_m)
         template_name = 'topic_explorer/index.html'
         return render(request,template_name,
             {'filename':None,
-             #'corpus_name' : corpus_name,
              'corpus_link' : corpus_link,
              'context_type' : context_type,
              'topics_range' : topics_range,
@@ -217,6 +278,17 @@ def index(request):
         return dump_exception()
 
 def visualize(request,k,filename=None,topic_no=None):
+    """!
+    Función para visualizar los tópicos
+
+    @author Jorge Redondo (jredondo at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @param request <b>{object}</b> Objeto que mantiene la peticion
+    @param k <b>{int}</b> Recibe el número de tópicos a mostrar
+    @param filename <b>{string}</b> Recibe el nombre del  archivo
+    @param topic_no <b>{int}</b> Recibe el número de tópico
+    @return Retorna el render de la vista
+    """
     global k_param,lda_c,lda_m,lda_v
     try:
         if k != k_param:
@@ -226,14 +298,11 @@ def visualize(request,k,filename=None,topic_no=None):
                                LDA_VOCAB_FILE,
                                LDA_CORPUS_DIR)
             lda_v = LDAViewer(lda_c, lda_m)
-        #lda_m = LCM.load(model_pattern.format(k_param))
-        #lda_v = LDAViewer(lda_c, lda_m)
         template_name = 'topic_explorer/index.html'
         return render(request,template_name,
             {'filename':filename,
              'k_param':k_param,
              'topic_no':topic_no,
-             #'corpus_name' : corpus_name,
              'corpus_link' : corpus_link,
              'context_type' : context_type,
              'topics_range' : topics_range,
@@ -243,15 +312,29 @@ def visualize(request,k,filename=None,topic_no=None):
         return dump_exception()
 
 class IrTopic(TemplateView):
+    """!
+    Clase que permite la visualización de un archivo en particular
+    @author Rodrigo Boet (rboet at cenditel.gob.ve)
+    @copyright <a href='http://www.gnu.org/licenses/gpl-2.0.html'>GNU Public License versión 2 (GPLv2)</a>
+    @date 31-07-2015
+    """
+    
     template_name='topic_explorer/verTopico.html'
+    
+    
     def get(self, request, propuesta = None):
+        """!
+        Metodo que permite procesar las peticiones por get, con el fin de mostrar el documento
+    
+        @author Rodrigo Boet (rboet at cenditel.gob.ve)
+        @copyright GNU/GPLv2
+        @date 31-07-2015
+        @param self <b>{object}</b> Objeto que instancia el método
+        @param request <b>{object}</b> Objeto que mantiene la peticion
+        @param propuesta <b>{int}</b> Recibe el número de la propuesta
+        @return Retorna el render de la vista
+        """
         global lda_v
-        #global k_param
-        #lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-        #                       LDA_CORPUS_FILE,
-        #                       LDA_VOCAB_FILE,
-        #                       LDA_CORPUS_DIR)
-        #lda_v = LDAViewer(lda_c, lda_m)
         #Obtnener json
         Topic_Json = populateJson(lda_v)
         Topic_Json = json.dumps(Topic_Json)
@@ -265,7 +348,6 @@ class IrTopic(TemplateView):
         mi_color = self.obtenerValores(topicos)
         mi_color = json.dumps(mi_color)
         topicos = json.dumps(topicos)
-        #print topicos
         #carga el pre-procesado del archivo en una variable
         texto=''
         direccion = FILES_PATH + '/'+ propuesta
@@ -284,13 +366,33 @@ class IrTopic(TemplateView):
                        'documento':documentos})
     
     def obtenerValores(self,topicos):#funcion para obtener los colores del json
+        """!
+        Metodo para obtener los colores del json
+    
+        @author Rodrigo Boet (rboet at cenditel.gob.ve)
+        @copyright GNU/GPLv2
+        @date 31-07-2015
+        @param self <b>{object}</b> Objeto que instancia el método
+        @param topicos <b>{dict}</b> Recibe un diccionario con los topicos 
+        @return Retorna un diccionario con los colores
+        """
         my_topic=[]
         for x in topicos:
             my_topic.append(topicos[x]['color'])
         return my_topic
     
     def obtenerDocumento(self,docs,propuesta):
-        #document = {}
+        """!
+        Metodo para obtener un documento
+    
+        @author Rodrigo Boet (rboet at cenditel.gob.ve)
+        @copyright GNU/GPLv2
+        @date 03-02-2016
+        @param self <b>{object}</b> Objeto que instancia el método
+        @param docs <b>{dict}</b> Recibe un diccionario con los documentos
+        @param propuesta <b>{int}</b> Recibe el número de la propuesta
+        @return Retorna un diccionario con los colores
+        """
         for x in docs:
             if(x['doc']==propuesta):
                 return x

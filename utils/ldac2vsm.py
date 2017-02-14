@@ -16,6 +16,10 @@ import numpy as np
 #path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/lda-c-dist/output/'
 #corpus_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/ap.dat'
 #vocab_file = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/lda-blei/ap/vocab.txt'
+path = '/home/rodrigo/Proyectos/Interpretacion/recursos/lda-blei/lda-c-dist/pruebas10/'
+corpus_file = '/home/rodrigo/Proyectos/Interpretacion/demo-data/prueba/lda/corpus.dat'
+vocab_file = '/home/rodrigo/Proyectos/Interpretacion/demo-data/prueba/lda/vocab.txt'
+corpus_dir = '/home/rodrigo/Proyectos/Interpretacion/demo-data/prueba/pp'
 
 def likelihood(path):
   with open(path + 'likelihood.dat') as f:
@@ -133,7 +137,7 @@ def corpus_model(k_param,path,corpus_file,vocab_file,corpus_dir):
 if __name__=='__main__':
   print "******************** MAIN **********************"
   #save_path = '/home/jredondo/Proyectos/Analisis_del_Discurso/src/topic-explorer/demo-data/corpus_propuestas/lda2vsm_models/'
-  save_path = '/home/rodrigo/Proyectos/Interpretacion/demo-data/data_ldac/'
-  c,m = corpus_model()
-  #c.save(save_path+'corpus.npz')
-  #save_lda(m,save_path+'model.npz')
+  save_path = '/home/rodrigo/Proyectos/Interpretacion/demo-data/prueba/models/'
+  c,m = corpus_model(50,path,corpus_file,vocab_file,corpus_dir)
+  c.save(save_path+'corpus.npz')
+  save_lda(m,save_path+'model.npz')

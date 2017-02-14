@@ -4,10 +4,12 @@
     <head>
         <meta charset='UTF-8'>
         <title>{% block title %}{% endblock %}</title>
-        <script src="{% static "topic_explorer/js/lib/jquery-1.11.0.min.js" %}"></script>
-        <script src="{% static "topic_explorer/bootstrap-2.3.2/js/bootstrap.min.js" %}"></script>
-        <script src="{% static "topic_explorer/js/lib/d3.v3.min.js" %}"></script>
-        <link rel="stylesheet" type="text/css" href="{% static "topic_explorer/bootstrap-2.3.2/css/bootstrap.min.css" %}"/>
+        <script src="{% static "js/lib/jquery-1.11.0.min.js" %}"></script>
+        <script src="{% static "bootstrap-2.3.2/js/bootstrap.min.js" %}"></script>
+        <script src="{% static "js/lib/d3.v3.min.js" %}"></script>
+        <script src="{% static "js/bootbox.min.js" %}"></script>
+        <script src="{% static "js/funciones.js" %}"></script>
+        <link rel="stylesheet" type="text/css" href="{% static "bootstrap-2.3.2/css/bootstrap.min.css" %}"/>
 
         {% block headScriptCss %}
         {% endblock %}
@@ -16,4 +18,5 @@
     {% block body %}
     {% endblock %}
     </body>
+    {% block extraJs %}{% endblock %}
 </html>

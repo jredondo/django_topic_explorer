@@ -39,7 +39,6 @@ inpho.util.getURLParamsAndValues = function() {
     var queryString = window.location.href.slice(window.location.href.indexOf('?') + 1);
     var keyValPairs = queryString.split('&');
 
-    console.log("Parsing query string: " + queryString);
     for(var i = 0; i < keyValPairs.length; i++) {
 		var pair = keyValPairs[i].split('=');
 		
@@ -55,12 +54,10 @@ inpho.util.getURLParamsAndValues = function() {
 }
 
 inpho.util.getValueForURLParam = function(param) {
-    console.log("getValueForURLParam",param)
     var paramsAndValues = inpho.util.getURLParamsAndValues();
     
     if(paramsAndValues.length == 0)
     	return null;
 
-    console.log(paramsAndValues[param]);
     return paramsAndValues[param];
 }

@@ -1,15 +1,13 @@
 {%extends 'base.html'%}
 {% load staticfiles %}
-<title>InPhO Topic Explorer</title>
+{% block title %}Topic Explorer{% endblock %}
 {%block headScriptCss%}
-<script src="{% static "topic_explorer/js/lib/jquery.superdom.min.js" %}"></script>
-<script src="{% static "topic_explorer/js/lib/jquery.cookie.min.js" %}"></script>
-<script src="{% static "topic_explorer/js/lib/mustache.js" %}"></script>
-<script src="{% static "topic_explorer/js/util.js" %}"></script>
-<script src="{% static "topic_explorer/js/fulltext.js" %}"></script>
-<script src="{% static "topic_explorer/js/htrc.js" %}"></script>
-<script src="{% static "topic_explorer/js/icons.js" %}"></script>
-<link rel="stylesheet" type="text/css" href="{% static "topic_explorer/css/topic_explorer.css" %}"/>
+<script src="{% static "js/lib/jquery.superdom.min.js" %}"></script>
+<script src="{% static "js/lib/jquery.cookie.min.js" %}"></script>
+<script src="{% static "js/util.js" %}"></script>
+<script src="{% static "js/fulltext.js" %}"></script>
+<script src="{% static "js/icons.js" %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static "css/topic_explorer.css" %}"/>
 {%endblock%}
 
 {%block body%}
@@ -174,10 +172,9 @@ $.getJSON('/topic_explorer/docs.json', function(data) {
   <button class="btn topdoc" type='button' style="display:none">Ordenar documentos para tópico [Topic]</button>
 </div>
 
-<!--<script src="topics.js"></script>-->
 <script>
 
-var icons = ["link"]; 
+var icons = ["link","ver"]; 
 var maxRows = 25;
 var minCols = 2;
 
@@ -491,10 +488,7 @@ d3.json(url, function(error, data) {
         .attr("x", function(d) { return x(d.x0); })
         .attr("width", function(d) { return x(d.x1) - x(d.x0); });
     }
-    
-    /*    Funcion para cargar los topicos al dar clic   */
-    cargar();
-  
+     
     d3.select(".sort").on("change", alphabetSort);
     
     $('#status .bar').addClass('bar-success').css('width', '100%').text("Complete!");
@@ -622,8 +616,7 @@ d3.json(url, function(error, data) {
       $('.reset').removeAttr('disabled');
       $('.topdoc').text('Top Documents for Topic ' + topic);
       $('.topdoc').show();
-      //$('.topdoc').click(function URL() {console.log("COMETNTADO"); location.href = location.origin + '?topic=' + topic;});
-      $('.topdoc').click(function URL() {console.log("ACTIVO"); location.href = location.origin + '/topic_explorer/topic/{{k_param}}/' + topic;});
+      $('.topdoc').click(function URL() {location.href = location.origin + '/topic_explorer/topic/{{k_param}}/' + topic;});
       $('.topdoc').mouseenter(function() {
           $('.legend rect').not('.top_' + topic).tooltip('hide');
           $(".legend rect.top_" + topic).tooltip('show'); });
@@ -677,15 +670,6 @@ d3.json(url, function(error, data) {
 
   }
   
-    function cargar(){
-      $(document).ready(function(){
-          $(".doc").click(function(){
-          var propuesta = $(this).find("text").text();
-          var url = "/topic_explorer/see_topic/"+propuesta+"/";
-          window.open(url);
-        });
-      });
-    }
    
 </script>
 
