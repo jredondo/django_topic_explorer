@@ -1,0 +1,22 @@
+Metadata-Version: 1.1
+Name: vsm
+Version: 0.3.3
+Summary: Vector Space Semantic Modeling Framework for the Indiana Philosophy Ontology Project
+Home-page: http://inpho.cogs.indiana.edu/
+Author: The Indiana Philosophy Ontology (InPhO) Project
+Author-email: inpho@indiana.edu
+License: MIT
+Download-URL: http://www.github.com/inpho/vsm
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Intended Audience :: Science/Research
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: Text Processing :: Linguistic

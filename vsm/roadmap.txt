@@ -1,0 +1,39 @@
+-------------------------------
+2014.10.20
+
+Roadmap towards a first release
+-------------------------------
+
+* Update unit tests. At present, these have not been updated with the
+  code changes.
+
+* Functional tests
+
+* Refactoring
+  
+  * All models take corpus objects
+  
+  * Refactoring corpus builders - documentation, tutorial
+  
+  * Refactoring corpus metadata
+
+* Include sample corpus and use in documentation
+
+* Sphinx-generated documentation
+
+  * Getting Started page (including how to install)
+
+  * Workflow
+
+  * Tutorials and demos
+
+Wishlist
+--------
+
+* Better defaults for LDA priors.
+
+* More Bayesian models. There are several descendants of LDA with
+  highly desirable features (e.g., correlated topics, topic change
+  models) we have yet to implement.
+
+* Robust plotting and clustering extensions.
