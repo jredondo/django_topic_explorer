@@ -15,5 +15,4 @@ progressbar>=2.3
 scipy>=0.18.1
 six>=1.10.0
 sqlparse>=0.2.2
--e git+https://github.com/inpho/vsm.git@9f28d724e691ed21007f501e19e1cceeb7040fd3#egg=vsm-origin/interop
 wsgiref>=0.1.2
