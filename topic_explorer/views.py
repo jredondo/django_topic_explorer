@@ -29,6 +29,7 @@ from vsm.viewer.ldagibbsviewer import LDAGibbsViewer as LDAViewer
 from vsm.viewer.wrappers import doc_label_name
 
 from django.views.generic import TemplateView
+from django.http import JsonResponse
 from django.core.urlresolvers import reverse
 
 from StringIO import StringIO
@@ -127,11 +128,7 @@ def doc_csv(request, k,doc_id,threshold=0.2):
     try:
         if k != k_param:
             k_param = k
-            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-                               LDA_CORPUS_FILE,
-                               LDA_VOCAB_FILE,
-                               LDA_CORPUS_DIR)
-            lda_v = LDAViewer(lda_c, lda_m)
+            generate_topic(k_param)
         data = lda_v.sim_doc_doc(doc_id)
 
         output=StringIO()
@@ -159,11 +156,7 @@ def topic_json(request,k,topic_no, N=40):
     try:
         if k != k_param:
             k_param = k
-            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-                               LDA_CORPUS_FILE,
-                               LDA_VOCAB_FILE,
-                               LDA_CORPUS_DIR)
-            lda_v = LDAViewer(lda_c, lda_m)
+            generate_topic(k_param,lda_c,lda_m,lda_v)
         try:
             N = int(request.query.n)
         except:
@@ -201,11 +194,7 @@ def doc_topics(request,doc_id, N=40):
     global lda_v
     try:
         if lda_v == None:
-            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-                               LDA_CORPUS_FILE,
-                               LDA_VOCAB_FILE,
-                               LDA_CORPUS_DIR)
-            lda_v = LDAViewer(lda_c, lda_m)
+            generate_topic(k_param)
         try:
             N = int(request.query.n)
         except:
@@ -293,11 +282,7 @@ def visualize(request,k,filename=None,topic_no=None):
     try:
         if k != k_param:
             k_param = k
-            lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
-                               LDA_CORPUS_FILE,
-                               LDA_VOCAB_FILE,
-                               LDA_CORPUS_DIR)
-            lda_v = LDAViewer(lda_c, lda_m)
+            generate_topic(k_param)
         template_name = 'topic_explorer/index.html'
         return render(request,template_name,
             {'filename':filename,
@@ -310,6 +295,25 @@ def visualize(request,k,filename=None,topic_no=None):
              'doc_url_format' : doc_url_format})
     except:
         return dump_exception()
+    
+def generate_topic(k_param):
+    """!
+    Función para generar los tópicos
+
+    @author Rodrigo Boet (rboet at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @date 13-03-2017
+    @param k_param <b>{object}</b> Objeto que contiene la cantidad de tópicos
+    @param lda_c <b>{object}</b> Objeto que perteneciente al lda
+    @param lda_m <b>{object}</b> Objeto que perteneciente al lda
+    @param lda_v <b>{object}</b> Objeto que perteneciente al lda
+    """
+    global lda_c,lda_m,lda_v
+    lda_c,lda_m = corpus_model(k_param,LDA_DATA_PATH.format(k_param),
+                       LDA_CORPUS_FILE,
+                       LDA_VOCAB_FILE,
+                       LDA_CORPUS_DIR)
+    lda_v = LDAViewer(lda_c, lda_m)
 
 class IrTopic(TemplateView):
     """!
@@ -365,7 +369,7 @@ class IrTopic(TemplateView):
                        'texto':texto,
                        'documento':documentos})
     
-    def obtenerValores(self,topicos):#funcion para obtener los colores del json
+    def obtenerValores(self,topicos):
         """!
         Metodo para obtener los colores del json
     
@@ -396,3 +400,53 @@ class IrTopic(TemplateView):
         for x in docs:
             if(x['doc']==propuesta):
                 return x
+
+class ListTopics(TemplateView):
+    """!
+    Clase que permite la visualización de un archivo en particular
+    @author Rodrigo Boet (rboet at cenditel.gob.ve)
+    @copyright <a href='http://www.gnu.org/licenses/gpl-2.0.html'>GNU Public License versión 2 (GPLv2)</a>
+    @date 13-03-2017
+    """
+    
+    template_name='topic_explorer/listTopics.html'
+    
+    def get_context_data(self,**kwargs):
+        """!
+        Metodo que permite cargar de nuevo valores en los datos de contexto de la vista
+    
+        @author Rodrigo Boet (rboet at cenditel.gob.ve)
+        @copyright GNU/GPLv2
+        @date 13-03-2017
+        @param self <b>{object}</b> Objeto que instancia la clase
+        @param kwargs <b>{object}</b> Objeto que contiene los datos de contexto
+        @return Retorna los datos de contexto
+        """
+        kwargs['topics_range'] = topics_range
+        return super(ListTopics, self).get_context_data(**kwargs)
+    
+    
+def generate_topics(request):
+    """!
+    Metodo que genera una lista de los tópicos dado un párametro k
+
+    @author Rodrigo Boet (rboet at cenditel.gob.ve)
+    @copyright GNU/GPLv2
+    @date 13-03-2017
+    @param request <b>{object}</b> Recibe la peticion
+    @return Retorna el json con las subunidades que consiguió
+    """
+    global lda_v
+    # Recibe por get el id del insumo
+    k_param = request.GET.get('k', None)
+    
+    if(k_param):
+        if(int(k_param) in topics_range):
+            generate_topic(k_param)
+            js = populateJson(lda_v)
+            return JsonResponse(js,safe=False)
+        return JsonResponse("El párametro k es inválido",safe=False)
+    return JsonResponse("Debe enviar el párametro k",safe=False)
+
+    
+        

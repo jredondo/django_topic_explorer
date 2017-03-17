@@ -16,5 +16,12 @@ urlpatterns = [
     url(r'^$', index , name='index'),
     url(r'^doc/(?P<k>\d+)/(?P<filename>.+)/$', visualize , name='visualize_doc'),
     url(r'^topic/(?P<k>\d+)/(?P<topic_no>\d+)/$', visualize , name='visualize'),
-    url(r'^see_topic/(?P<propuesta>.+)/$',IrTopic.as_view(),name='see_topic')
+    url(r'^see_topic/(?P<propuesta>.+)/$',IrTopic.as_view(),name='see_topic'),
+    url(r'^topic_list$', ListTopics.as_view() , name='list_topic'),
+]
+
+## Url por ajax
+
+urlpatterns += [
+    url(r'^generate_topics$', generate_topics , name='generate_topics'),
 ]

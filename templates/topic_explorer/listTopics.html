@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %} Tópicos {% endblock %}
+{% block body %}
+    <div class="container">
+      <h1>Cantidad de Tópicos</h1><hr>
+      <div class="btn-group">
+        <button type="button" id="visualize" class="btn btn-default" >Visualizar</button>
+        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          {% for k in topics_range %}
+            <li><a href="{{k}}" onclick="visualize(this,event)">{{k}} Topics</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="row">
+        <div class="progress non-null" role="progressbar" id="status" style="display:none;">
+          <div class="progress-bar progress-bar-striped active" aria-valuemin="0" aria-valuemax="100" style="width: 45%;">
+            <div class="bar" style="width:25%">Cargando tópicos...</div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div id="topicos"></div>
+      </div>
+    </div>
+{% endblock %}
